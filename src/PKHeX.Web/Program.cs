@@ -50,6 +50,7 @@ builder.Services.AddHttpClient("BackendApi.Anonymous", client =>
 builder.Services.AddScoped<BackendApiAuthHandler>();
 
 builder.Services.AddScoped<GameService>();
+builder.Services.AddScoped<SaveLibraryService>();
 builder.Services.AddScoped<EncounterService>();
 builder.Services.AddScoped<LoadPokemonService>();
 builder.Services.AddScoped<AnalyticsResultsService>();

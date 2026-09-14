@@ -1,0 +1,60 @@
+@inject ClipboardService Clipboard
+@inject INotificationService Notification
+
+@*
+    Browsers refuse to hand a page certain directories regardless of what the user picks. On Linux that
+    blocklist covers everything under ~/.config - which is exactly where RetroArch keeps its saves by
+    default, so this is the normal case for Linux users rather than an edge case.
+
+    Nothing this app does can lift that: the refusal happens in the browser before the page is involved.
+*@
+
+<div class="folder-help">
+    <h3 class="folder-help-title">If the browser refused your saves folder</h3>
+
+    <p>
+        Browsers keep a list of directories they will never hand to a web page. On Linux that list covers
+        everything inside <code>~/.config</code> — which is where RetroArch stores saves by default, so
+        <code>~/.config/retroarch/saves</code> can never be linked directly. The refusal happens in the
+        browser before this page has any say in it.
+    </p>
+
+    <p>The fix is to keep your saves somewhere outside that list. Two ways:</p>
+
+    <h4 class="folder-help-sub">1. Point RetroArch at a normal folder (recommended)</h4>
+    <p class="muted">
+        Permanent, and every save you make from then on lands somewhere linkable.
+    </p>
+    <pre class="folder-help-code">@MoveCommands</pre>
+    <Button Size="@ButtonSize.Small" OnClick="() => Copy(MoveCommands)">Copy</Button>
+    <p class="muted">
+        Then in RetroArch: <strong>Settings → Directory → Save Files</strong>, and choose the new folder.
+    </p>
+
+    <h4 class="folder-help-sub">2. Symlink it</h4>
+    <p class="muted">
+        Less disruptive, but may not help: browsers resolve a symlink to its real location before checking
+        it, so a link pointing into <code>~/.config</code> is usually refused too. Worth one try.
+    </p>
+    <pre class="folder-help-code">@SymlinkCommand</pre>
+    <Button Size="@ButtonSize.Small" OnClick="() => Copy(SymlinkCommand)">Copy</Button>
+</div>
+
+@code {
+    private const string MoveCommands =
+        "mkdir -p ~/Games/PokemonSaves\n" +
+        "cp -r ~/.config/retroarch/saves/. ~/Games/PokemonSaves/";
+
+    private const string SymlinkCommand =
+        "ln -s ~/.config/retroarch/saves ~/PokemonSaves";
+
+    private async Task Copy(string text)
+    {
+        await Clipboard.WriteTextAsync(text);
+        _ = Notification.Open(new()
+        {
+            Message = "Copied",
+            NotificationType = NotificationType.Success,
+        });
+    }
+}

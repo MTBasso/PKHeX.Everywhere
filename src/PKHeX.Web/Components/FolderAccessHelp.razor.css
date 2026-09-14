@@ -1,0 +1,36 @@
+.folder-help {
+    max-width: 680px;
+    padding: 16px 18px;
+    border: 1px solid rgba(128, 128, 128, 0.3);
+    border-radius: 3px;
+    background: rgba(128, 128, 128, 0.06);
+}
+
+.folder-help-title {
+    margin: 0 0 10px;
+    font-size: 15px;
+}
+
+.folder-help-sub {
+    margin: 18px 0 4px;
+    font-size: 13px;
+}
+
+.folder-help p {
+    margin: 0 0 8px;
+}
+
+.folder-help .muted {
+    opacity: 0.65;
+    font-size: 12px;
+}
+
+.folder-help-code {
+    margin: 6px 0;
+    padding: 10px 12px;
+    border-radius: 3px;
+    background: rgba(128, 128, 128, 0.16);
+    font-size: 12px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}

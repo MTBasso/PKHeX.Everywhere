@@ -1,6 +1,15 @@
 import {decryptAes, encryptAes} from "./crypto/aes.ts";
 import {md5Hash} from "./crypto/md5.ts";
 import {downloadFileFromStream} from "./files/files.ts";
+import {
+    forgetSaveFolder,
+    isSaveLibrarySupported,
+    pickSaveFolder,
+    readSaveFile,
+    requestSaveFolderPermission,
+    restoreSaveFolder,
+    scanSaveFolder,
+} from "./files/saveLibrary.ts";
 
 export function setupWindow() {
     // crypt
@@ -10,6 +19,15 @@ export function setupWindow() {
     
     // files
     window.downloadFileFromStream = downloadFileFromStream;
+
+    // save library
+    window.isSaveLibrarySupported = isSaveLibrarySupported;
+    window.pickSaveFolder = pickSaveFolder;
+    window.restoreSaveFolder = restoreSaveFolder;
+    window.requestSaveFolderPermission = requestSaveFolderPermission;
+    window.forgetSaveFolder = forgetSaveFolder;
+    window.scanSaveFolder = scanSaveFolder;
+    window.readSaveFile = readSaveFile;
 
     // ui functions
     window.getWidth = () => window.innerWidth;

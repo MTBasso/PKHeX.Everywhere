@@ -1,0 +1,225 @@
+@page "/"
+@page "/saves"
+@inject SaveLibraryService Library
+@inject GameService GameService
+@inject NavigationManager Navigation
+@inject INotificationService Notification
+
+<PageTitle>Saves</PageTitle>
+
+<Flex Direction="FlexDirection.Vertical" Style="width: 100%; gap: 20px;">
+    <PageHeader Style="max-width: 100%">
+        <TitleTemplate>Saves</TitleTemplate>
+        <PageHeaderExtra>
+            @if (_folder is not null && _supported)
+            {
+                <Button Type="@ButtonType.Default" OnClick="Rescan" Loading="_scanning">Rescan</Button>
+                <Button Type="@ButtonType.Link" Danger OnClick="Forget">Unlink</Button>
+            }
+        </PageHeaderExtra>
+    </PageHeader>
+
+    @if (!_ready)
+    {
+        <span class="muted">Checking...</span>
+    }
+    else if (!_supported)
+    {
+        <Alert Type="@AlertType.Info"
+               Message="This browser cannot link a folder"
+               Description="Linking a save folder needs the File System Access API, which today only Chromium browsers (Chrome, Edge) implement. Everything else still works - load a save with the Load button and export a copy when you are done."
+               ShowIcon/>
+    }
+    else if (_folder is null)
+    {
+        <div class="library-empty">
+            <p>Link the folder where your saves live. It is scanned for anything that parses as a save, including sub-folders, so one emulator directory is usually enough.</p>
+            <Button Type="@ButtonType.Primary" OnClick="PickFolder">Link a folder</Button>
+            <Button Type="@ButtonType.Link" OnClick="() => _showFolderHelp = !_showFolderHelp">
+                Browser refused your folder?
+            </Button>
+        </div>
+
+        @if (_showFolderHelp)
+        {
+            <FolderAccessHelp/>
+        }
+    }
+    else if (_folder.Permission != "granted")
+    {
+        <div class="library-empty">
+            <p>
+                <strong>@_folder.Name</strong> is still linked, but the browser does not keep permission
+                between visits. One click restores it.
+            </p>
+            <Button Type="@ButtonType.Primary" OnClick="Reconnect">Reconnect folder</Button>
+        </div>
+    }
+    else
+    {
+        <div class="library-bar">
+            <span class="library-folder">@_folder.Name</span>
+            <span class="muted">@(_scanning ? "Scanning..." : $"{_entries.Count} save(s)")</span>
+        </div>
+
+        @if (!_scanning && _entries.Count == 0)
+        {
+            <span class="muted">Nothing in this folder parsed as a save file.</span>
+        }
+
+        <div class="save-cards">
+            @foreach (var entry in _entries)
+            {
+                var current = entry;
+                <div class="save-card @(IsCurrent(current) ? "is-current" : "")"
+                     role="button"
+                     tabindex="0"
+                     @onclick="() => OpenSave(current)">
+
+                    <div class="save-card-head">
+                        <span class="save-card-gen">@current.Summary.Context</span>
+                        <span class="save-card-game">@current.Summary.GameName</span>
+                    </div>
+
+                    <div class="save-card-row">
+                        OT @current.Summary.TrainerName
+                        <span class="muted"> - TID @current.Summary.TrainerId</span>
+                    </div>
+
+                    <div class="save-card-row muted">
+                        Party @current.Summary.PartyCount - Boxes @current.Summary.BoxCount
+                    </div>
+
+                    <div class="save-card-row muted">
+                        @current.Summary.PlayTime - @LanguageName(current.Summary.Language)
+                        @if (!current.Summary.ChecksumsValid)
+                        {
+                            <span class="save-card-warn" title="Checksums do not validate">checksum</span>
+                        }
+                    </div>
+
+                    <div class="save-card-path" title="@current.File.Path">@current.File.Path</div>
+                </div>
+            }
+        </div>
+    }
+
+    @*
+        The single-file flow is the fallback for everyone who cannot link a folder - every non-Chromium
+        browser, and any folder the browser refuses. It stays visible rather than hiding behind the
+        failure case, because it is also just the quicker path for a one-off edit.
+    *@
+    <div class="library-fallback">
+        <h3 class="library-fallback-title">Load a single save file</h3>
+        <p class="muted">
+            Works in every browser. You pick a file, edit it, and export a copy when you are done -
+            nothing is written back to the original.
+        </p>
+        <LoadGameComponent/>
+    </div>
+</Flex>
+
+@code {
+    private bool _ready;
+    private bool _showFolderHelp;
+    private bool _supported;
+    private bool _scanning;
+    private SaveLibraryService.FolderState? _folder;
+    private IReadOnlyList<SaveLibraryService.LibraryEntry> _entries = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        _supported = await Library.IsSupported();
+
+        if (_supported)
+        {
+            // Querying permission needs no gesture, so a previously linked folder can be recognised on
+            // load; actually regaining access still needs the user to click.
+            _folder = await Library.RestoreFolder();
+
+            if (_folder is {Permission: "granted"}) await Rescan();
+        }
+
+        _ready = true;
+    }
+
+    private async Task PickFolder()
+    {
+        var result = await Library.PickFolder();
+
+        // A refused folder and a cancelled dialog are indistinguishable here, so the workaround is
+        // offered on both rather than guessing which happened.
+        _showFolderHelp = result.Status != "ok";
+
+        if (result.Status != "ok") return;
+
+        _folder = result.Folder;
+        if (_folder is {Permission: "granted"}) await Rescan();
+    }
+
+    private async Task Reconnect()
+    {
+        var permission = await Library.RequestPermission();
+        _folder = _folder is null ? null : _folder with {Permission = permission};
+
+        if (permission == "granted") await Rescan();
+    }
+
+    private async Task Forget()
+    {
+        await Library.ForgetFolder();
+        _folder = null;
+        _entries = [];
+    }
+
+    private async Task Rescan()
+    {
+        _scanning = true;
+        try
+        {
+            _entries = await Library.Scan();
+        }
+        finally
+        {
+            _scanning = false;
+        }
+    }
+
+    private bool IsCurrent(SaveLibraryService.LibraryEntry entry) =>
+        GameService.IsLoaded && GameService.FileName == entry.File.Name;
+
+    private async Task OpenSave(SaveLibraryService.LibraryEntry entry)
+    {
+        var bytes = await Library.ReadFile(entry.File.Id);
+        if (bytes is null) return;
+
+        try
+        {
+            GameService.Load(bytes, entry.File.Name);
+            Navigation.NavigateToTrainer();
+        }
+        catch (GameNotLoadedException)
+        {
+            _ = Notification.Open(new()
+            {
+                Message = "Could not open that save",
+                Description = entry.File.Path,
+                NotificationType = NotificationType.Error,
+            });
+        }
+    }
+
+    private static string LanguageName(int language) => language switch
+    {
+        1 => "JPN",
+        2 => "ENG",
+        3 => "FRE",
+        4 => "ITA",
+        5 => "GER",
+        7 => "SPA",
+        8 => "KOR",
+        9 => "CHS",
+        10 => "CHT",
+        _ => "-",
+    };
+}

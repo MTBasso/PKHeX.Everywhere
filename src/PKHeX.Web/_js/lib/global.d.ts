@@ -1,6 +1,15 @@
 import {decryptAes, encryptAes} from "./crypto/aes.ts";
 import {md5Hash} from "./crypto/md5.ts";
 import {downloadFileFromStream} from "./files/files.ts";
+import {
+    forgetSaveFolder,
+    isSaveLibrarySupported,
+    pickSaveFolder,
+    readSaveFile,
+    requestSaveFolderPermission,
+    restoreSaveFolder,
+    scanSaveFolder,
+} from "./files/saveLibrary.ts";
 import {User} from "./types.ts";
 
 type IdToken = string;
@@ -14,6 +23,15 @@ declare global {
 
         // files
         downloadFileFromStream: typeof downloadFileFromStream;
+
+        // save library
+        isSaveLibrarySupported: typeof isSaveLibrarySupported;
+        pickSaveFolder: typeof pickSaveFolder;
+        restoreSaveFolder: typeof restoreSaveFolder;
+        requestSaveFolderPermission: typeof requestSaveFolderPermission;
+        forgetSaveFolder: typeof forgetSaveFolder;
+        scanSaveFolder: typeof scanSaveFolder;
+        readSaveFile: typeof readSaveFile;
         
         // ui
         getWidth: () => number;

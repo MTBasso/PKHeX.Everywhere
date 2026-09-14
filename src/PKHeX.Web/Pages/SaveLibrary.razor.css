@@ -1,0 +1,123 @@
+.muted {
+    opacity: 0.6;
+    font-size: 12px;
+}
+
+.library-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    max-width: 620px;
+    padding: 18px;
+    border: 1px dashed rgba(128, 128, 128, 0.35);
+    border-radius: 3px;
+}
+
+.library-empty p {
+    margin: 0;
+}
+
+.library-bar {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.library-folder {
+    font-size: 14px;
+}
+
+.save-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px;
+}
+
+.save-card {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 10px 12px;
+    border: 1px solid rgba(128, 128, 128, 0.25);
+    border-radius: 3px;
+    background: rgba(128, 128, 128, 0.06);
+    cursor: pointer;
+    transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.save-card:hover {
+    background: rgba(128, 128, 128, 0.14);
+    border-color: rgba(128, 128, 128, 0.45);
+}
+
+.save-card:focus-visible {
+    outline: 2px solid rgba(24, 144, 255, 0.9);
+    outline-offset: 1px;
+}
+
+.save-card.is-current {
+    border-color: rgba(24, 144, 255, 0.7);
+    background: rgba(24, 144, 255, 0.12);
+}
+
+.save-card-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 3px;
+}
+
+.save-card-gen {
+    flex: 0 0 auto;
+    padding: 0 6px;
+    font-size: 11px;
+    border: 1px solid rgba(128, 128, 128, 0.4);
+    border-radius: 2px;
+    opacity: 0.8;
+}
+
+.save-card-game {
+    font-size: 14px;
+}
+
+.save-card-row {
+    font-size: 12px;
+}
+
+.save-card-warn {
+    margin-left: 6px;
+    padding: 0 5px;
+    border-radius: 2px;
+    background: rgba(245, 34, 45, 0.18);
+    color: #ff7875;
+}
+
+/* a long path must not stretch the card - the full value is on the title attribute */
+.save-card-path {
+    margin-top: 4px;
+    font-size: 11px;
+    opacity: 0.45;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.library-fallback {
+    margin-top: 10px;
+    padding: 14px 16px;
+    border-top: 1px solid rgba(128, 128, 128, 0.22);
+}
+
+.library-fallback-title {
+    margin: 0 0 4px;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.6;
+}
+
+.library-fallback p {
+    margin: 0 0 10px;
+    max-width: 620px;
+}
