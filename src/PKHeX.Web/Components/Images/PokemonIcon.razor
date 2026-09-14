@@ -1,13 +1,39 @@
 @using PKHeX.Core
 @using PKHeX.Facade.Repositories
 
-<Image Src="@ContentUrl()" Preview="false"></Image>
+<img class="pokemon-sprite"
+     style="@($"width: {Size}; height: {Size};")"
+     src="@SpriteUrl"
+     alt="@Species.ToString()"
+     loading="lazy"
+     onerror="this.onerror=null; this.src='@IconUrl';"/>
 
 @code {
     [Parameter] public Species Species { get; set; }
     [Parameter] public FormDefinition? Form { get; set; }
-    
-    private string ContentUrl() => $"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-viii/icons/{Species.Id()}{FormPostFix()}.png";
+
+    /// Any CSS length - callers in dense lists pass something small, the box grid passes a percentage
+    /// so a slot's sprite scales with the slot.
+    [Parameter] public string Size { get; set; } = "48px";
+
+    private const string Root =
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions";
+
+    /// Black/White sprites only exist up to Genesect. Everything after it, and every regional form
+    /// introduced after Gen 5, has no Black/White artwork at all - those fall back to the Gen 8 icons
+    /// this component used previously. The onerror handler covers whatever gaps remain inside the range,
+    /// so a missing sprite degrades to an icon rather than to a broken image.
+    private const int LastBlackWhiteSpeciesId = 649;
+
+    private bool HasBlackWhiteSprite =>
+        Species.Id() is > 0 and <= LastBlackWhiteSpeciesId && FormPostFix() == string.Empty;
+
+    private string SpriteUrl => HasBlackWhiteSprite
+        ? $"{Root}/generation-v/black-white/animated/{Species.Id()}.gif"
+        : IconUrl;
+
+    private string IconUrl =>
+        $"{Root}/generation-viii/icons/{Species.Id()}{FormPostFix()}.png";
 
     private string FormPostFix() => Form switch
     {
@@ -15,5 +41,4 @@
         { IsGalarian: true } => "-galar",
         _ => string.Empty
     };
-
 }

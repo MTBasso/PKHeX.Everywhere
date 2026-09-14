@@ -1,10 +1,11 @@
-@font-face {
-    font-family: 'Pokemon GB';
-    src: url("../font/pkmgb.ttf");
-}
-
+/*
+    The app deliberately ships no pixel/bitmap face. It was tried as an accent on the brand, page titles
+    and loading screen, and dropped: it fought AntDesign's type metrics everywhere it touched and read as
+    costume rather than character.
+*/
 html, body {
-    font-family: 'Pokemon GB', "Lucida Console", sans-serif;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
 #app {

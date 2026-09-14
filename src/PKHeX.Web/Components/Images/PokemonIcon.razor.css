@@ -1,0 +1,6 @@
+.pokemon-sprite {
+    display: block;
+    object-fit: contain;
+    /* Black/White sprites are small bitmaps; let them scale up crisply instead of blurring */
+    image-rendering: pixelated;
+}
