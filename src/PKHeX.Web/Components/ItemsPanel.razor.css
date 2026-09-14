@@ -1,0 +1,17 @@
+.items-panel {
+    border: 1px solid rgba(128, 128, 128, 0.25);
+    border-radius: 3px;
+    padding: 0 14px 10px;
+}
+
+.items-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+}
+
+.items-panel-title {
+    font-size: 15px;
+}

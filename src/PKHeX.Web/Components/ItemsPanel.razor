@@ -1,16 +1,14 @@
-@page "/items"
 @using PKHeX.Facade.Repositories
 @using PKHeX.Web.Plugins
 @using PKHeX.Web.Services.Plugins
 
-<Flex Direction="FlexDirection.Vertical" Style="width: 100%;gap: 20px;">
-    <PageHeader BackIcon="true" Style="max-width: 100%">
-        <TitleTemplate>Items</TitleTemplate>
+@* Extracted from the standalone Items page so Home can host it - see the Items/Home merge. *@
 
-        <PageHeaderExtra>
-            <ButtonOrMenu Actions="ExtraActions" />
-        </PageHeaderExtra>
-    </PageHeader>
+<div class="items-panel">
+    <div class="items-panel-head">
+        <span class="items-panel-title">Items</span>
+        <Button Type="@ButtonType.Primary" Icon="@IconType.Outline.Plus" OnClick="OnAddItemClick">Add</Button>
+    </div>
 
     <Tabs @bind-ActiveKey="@_activeKey" DefaultActiveKey="@DefaultActiveKey" Class="tab-scrollable" Animated>
         @foreach (var inventoryType in InventoryTypes)
@@ -23,7 +21,7 @@
             </TabPane>
         }
     </Tabs>
-</Flex>
+</div>
 
 @if (ActiveInventory is not null)
 {
@@ -38,17 +36,6 @@
     [Inject] public required PlugInRuntime PlugInRuntime { get; set; }
     [Inject] public required GameService GameService { get; set; }
     [Inject] public required AnalyticsService Analytics { get; set; }
-
-    List<ButtonOrMenu.ButtonAction> ExtraActions => new()
-    {
-        new ()
-        {
-            Type = ButtonType.Primary,
-            Icon = IconType.Outline.Plus,
-            Label = "Add",
-            OnClickAsync = OnAddItemClick
-        }
-    };
 
     string? _activeKey;
 
@@ -75,15 +62,10 @@
         await PlugInRuntime.RunAll<IRunOnItemChanged>(h => h.OnItemChanged(new(itemToBeAdded.Id, itemToBeAdded.Count)));
         _addItemModalVisible = false;
 
-        Track(itemToBeAdded);
-        
+        Analytics.TrackItemModified(itemToBeAdded);
+
         StateHasChanged();
         ShouldRender();
-    }
-
-    private void Track(AddItemModal.ItemToBeAdded itemToBeAdded)
-    {
-        Analytics.TrackItemModified(itemToBeAdded);
     }
 
     private void HandleCancel()
@@ -92,5 +74,4 @@
     }
 
     #endregion
-
 }

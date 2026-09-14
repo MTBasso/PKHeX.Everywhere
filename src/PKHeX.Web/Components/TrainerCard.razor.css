@@ -1,0 +1,63 @@
+/* Neutral translucency again, so the card sits correctly on both AntDesign themes. */
+.trainer-card {
+    border: 1px solid rgba(128, 128, 128, 0.25);
+    border-radius: 3px;
+    background: rgba(128, 128, 128, 0.06);
+    overflow: hidden;
+}
+
+.trainer-card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.22);
+    background: rgba(128, 128, 128, 0.10);
+}
+
+.trainer-card-badge {
+    flex: 0 0 auto;
+    padding: 1px 7px;
+    font-size: 11px;
+    border: 1px solid rgba(128, 128, 128, 0.4);
+    border-radius: 2px;
+    opacity: 0.85;
+}
+
+.trainer-card-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 15px;
+}
+
+.trainer-card-id {
+    flex: 0 0 auto;
+    font-size: 12px;
+    opacity: 0.6;
+}
+
+.trainer-card-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 12px 20px;
+    padding: 14px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.field-label {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.55;
+}
+
+.field-value {
+    font-size: 14px;
+}
