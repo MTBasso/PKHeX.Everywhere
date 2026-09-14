@@ -14,8 +14,10 @@ public static class NavigationManagerExtensions
     public static void NavigateToHomePage(this NavigationManager navigation) =>
         navigation.NavigateTo("/");
     
-    public static void NavigateToItems(this NavigationManager navigation) =>
-        navigation.NavigateTo("/items");
+    /// Where the user lands once a save is open. Distinct from the home page, which is now the save
+    /// library - sending someone back there straight after they picked a save would be a loop.
+    public static void NavigateToTrainer(this NavigationManager navigation) =>
+        navigation.NavigateTo("/trainer");
 
     public static void NavigateToPokemon(this NavigationManager navigation, PokemonSource source, UniqueId uniqueId,
         bool replace = false) =>

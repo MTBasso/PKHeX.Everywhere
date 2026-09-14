@@ -8,16 +8,14 @@
 <Layout Style="min-height: 100vh">
     <NewsBanner />
     
-    <Sider Collapsible
-           Breakpoint="@BreakpointType.Lg"
-           CollapsedWidth="64"
-           @bind-Collapsed=@_collapsed>
+    <Header Class="top-bar">
 
         <div class="logo">PKHeX.Web</div>
 
         <Menu
+            Class="top-nav"
             Theme="MenuTheme.Dark"
-            Mode="MenuMode.Inline"
+            Mode="MenuMode.Horizontal"
             DefaultSelectedKeys="@( [SelectedMenuItem?.Route ?? string.Empty])"
             SelectedKeys="@( [SelectedMenuItem?.Route ?? string.Empty])">
             @foreach (var item in MenuItems)
@@ -48,19 +46,30 @@
                 }
             }
         </Menu>
-    </Sider>
-    <Layout>
-        <Header Style="display: flex; justify-items: center; align-items: center; width: 100%">
-            <div style="flex-grow: 1"></div>
+
+        <div class="top-bar-spacer"></div>
+
+        @*
+            Saving hands back a new file and never touches the original, so it needs to be reachable from
+            anywhere - it used to be a nav entry, and folding that away left it buried on the Saves page.
+        *@
+        @if (GameService.IsLoaded)
+        {
             <Button
-                Style="flex-shrink: 1"
-                Type="@ButtonType.Default"
-                Icon="@IconType.Outline.Setting"
-                Size="@ButtonSize.Large"
-                Shape="@ButtonShape.Round"
-                OnClick="HandleSettingsClick">
+                Type="@ButtonType.Primary"
+                Icon="@IconType.Outline.Download"
+                OnClick="HandleSaveClick">
+                Save
             </Button>
-        </Header>
+        }
+
+        <Button
+            Type="@ButtonType.Default"
+            Icon="@IconType.Outline.Setting"
+            Shape="@ButtonShape.Round"
+            OnClick="HandleSettingsClick">
+        </Button>
+    </Header>
         <Content Style=" margin: 24px 16px 0;">
             <div class="site-layout-background" style="padding: 24px; min-height: 360px">
                 <AnalyticsAwareErrorBoundary
@@ -106,28 +115,22 @@
             </div>
         </Content>
 
-        <PkHexFooter/>
-        <PokemonSyncToast/>
-    </Layout>
+    <PkHexFooter/>
+    <PokemonSyncToast/>
 
 </Layout>
 
 @code {
     [Inject] public required PlugInRegistry PlugInRegistry { get; set; }
 
-    bool _collapsed;
     AnalyticsAwareErrorBoundary _errorBoundary = default!;
     MenuItem? SelectedMenuItem => MenuItems.SingleOrDefault(m => m.Route == Navigation.CurrentRoute());
 
     IEnumerable<MenuItem> MenuItems =>
     [
-        new("", "Home", "home", true),
-        new("party", "Party", "team"),
-        new("pokemon-box", "Pokemon Box", "inbox"),
-        new("items", "Items", "shop"),
-        new("plugins", "Plug-Ins", "api", true, PluginMenuItems),
-        new("analytics", "Analytics", "line-chart", true),
-        new("save", "Save", "save", true),
+        new("", "Saves", "folder-open", true),
+        new("trainer", "Trainer", "user"),
+        new("pokemon-box", "Storage", "inbox"),
     ];
 
     List<MenuItem> PluginMenuItems
@@ -164,9 +167,11 @@
         }
     }
 
+    private Task HandleSaveClick() => GameService.ExportToDownload();
+
     private void OnGameLoaded(object? sender, EventArgs args)
     {
-        Navigation.NavigateTo("/");
+        Navigation.NavigateToTrainer();
     }
 
 
@@ -181,7 +186,7 @@
     private Task OnLoadRequested(BrowserWindowService.SaveLoadedRequested arg)
     {
         GameService.Load(arg.Bytes, arg.FileName);
-        Navigation.NavigateToHomePage();
+        Navigation.NavigateToTrainer();
 
         return Task.CompletedTask;
     }

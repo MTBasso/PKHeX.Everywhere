@@ -33,3 +33,35 @@
 /*
     --- End .tab-scrollable ---
 */
+
+/*
+    --- top bar ---
+    Navigation moved out of the collapsible Sider and onto a single row across the top.
+    Header and Menu are AntDesign components, so CSS isolation cannot reach them from
+    MainLayout.razor.css - these rules have to live here, globally.
+*/
+.top-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 16px;
+}
+
+.top-bar-spacer {
+    flex: 1 1 auto;
+}
+
+.top-nav {
+    flex: 1 1 auto;
+    min-width: 0;
+    border-bottom: none !important;
+}
+
+/* the horizontal menu centres itself against the header's line-height rather than its box */
+.top-bar .ant-menu-horizontal {
+    line-height: inherit;
+    background: transparent;
+}
+/*
+    --- End top bar ---
+*/

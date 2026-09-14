@@ -1,47 +1,65 @@
 @page "/settings"
 @using PKHeX.Web.Services.GeneralSettings
 
-@inject AntdThemeService ThemeService
-@inject GeneralSettingsService GeneralSettings
+@*
+    Plug-Ins and Analytics used to be their own nav entries. They are settings-shaped - things you
+    configure occasionally rather than work in - so they live here and the nav row keeps three links.
+    Both keep their own routes, so existing deep links and plugin sub-pages still resolve.
+*@
 
-<ResponsibleDescriptions
-    Title="General"
-    Bordered
-    Size="DescriptionsSize.Small"
-    Style="width: 100%">
+<Tabs DefaultActiveKey="general" Class="tab-scrollable">
+    <TabPane Key="general" Tab="General">
+        @inject AntdThemeService ThemeService
+        @inject GeneralSettingsService GeneralSettings
 
-    <DescriptionsItem Title="Calculator">
-        <AutoComplete
-            @ref="_calculatorElement"
-            TOption="CalculatorRepository.Calculator"
-            Value="@SelectedCalculator"
-            ValueChanged="HandleCalculatorUrlChanged"
-            Options="CalculatorRepository.Instance.GetAll()"
-            OptionFormat="o => o.Value.Name"
-            OnSelectionChange="OnCalculatorPresetChanged"
-            Placeholder="Calculator or URL (Default: Showdown)"
-            DefaultActiveFirstOption="true"
-            FilterExpression="@((_, _) => true)"/>
-    </DescriptionsItem>
+        <ResponsibleDescriptions
+            Title="General"
+            Bordered
+            Size="DescriptionsSize.Small"
+            Style="width: 100%">
 
-</ResponsibleDescriptions>
+            <DescriptionsItem Title="Calculator">
+                <AutoComplete
+                    @ref="_calculatorElement"
+                    TOption="CalculatorRepository.Calculator"
+                    Value="@SelectedCalculator"
+                    ValueChanged="HandleCalculatorUrlChanged"
+                    Options="CalculatorRepository.Instance.GetAll()"
+                    OptionFormat="o => o.Value.Name"
+                    OnSelectionChange="OnCalculatorPresetChanged"
+                    Placeholder="Calculator or URL (Default: Showdown)"
+                    DefaultActiveFirstOption="true"
+                    FilterExpression="@((_, _) => true)"/>
+            </DescriptionsItem>
 
-<ResponsibleDescriptions
-    Title="Appearance"
-    Bordered
-    Size="DescriptionsSize.Small"
-    Style="width: 100%">
+        </ResponsibleDescriptions>
 
-    <DescriptionsItem Title="Theme">
-        <Switch
-            Style="margin-left: auto; margin-right: 15px;"
-            Value="ThemeService.IsDarkTheme"
-            OnChange="HandleThemeChanged"
-            CheckedChildren="Dark"
-            UnCheckedChildren="Light"/>
-    </DescriptionsItem>
+        <ResponsibleDescriptions
+            Title="Appearance"
+            Bordered
+            Size="DescriptionsSize.Small"
+            Style="width: 100%">
 
-</ResponsibleDescriptions>
+            <DescriptionsItem Title="Theme">
+                <Switch
+                    Style="margin-left: auto; margin-right: 15px;"
+                    Value="ThemeService.IsDarkTheme"
+                    OnChange="HandleThemeChanged"
+                    CheckedChildren="Dark"
+                    UnCheckedChildren="Light"/>
+            </DescriptionsItem>
+
+        </ResponsibleDescriptions>
+    </TabPane>
+
+    <TabPane Key="plugins" Tab="Plug-Ins">
+        <PlugIns/>
+    </TabPane>
+
+    <TabPane Key="analytics" Tab="Analytics">
+        <AnalyticsResults/>
+    </TabPane>
+</Tabs>
 
 @code {
     private AutoComplete<CalculatorRepository.Calculator> _calculatorElement = default!;

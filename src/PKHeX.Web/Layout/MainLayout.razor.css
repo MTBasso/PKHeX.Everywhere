@@ -1,8 +1,9 @@
+/* the brand now sits at the left of the top bar rather than above a sidebar */
 .logo {
     color: white;
-    margin-top: 10px;
-    padding: 16px;
-    text-align: center;
+    flex: 0 0 auto;
+    padding: 0 8px 0 0;
+    white-space: nowrap;
 }
 
 .nav-text > a {

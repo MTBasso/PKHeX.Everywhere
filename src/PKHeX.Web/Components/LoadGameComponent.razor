@@ -88,7 +88,7 @@ else
     private Task LoadEmpty(GameVersionDefinition version)
     {
         GameService.LoadBlank(version);
-        Navigation.NavigateTo("/");
+        Navigation.NavigateToTrainer();
 
         return Task.CompletedTask;
     }
@@ -122,17 +122,14 @@ else
             });
         }
 
-        Navigation.NavigateTo("/");
+        Navigation.NavigateToTrainer();
     }
 
     private async Task ExportSaveAsync()
     {
         if (!GameService.IsLoaded) return;
 
-        var stream = GameService.Export();
-        await Js.DownloadFile(stream, GameService.FileName ?? string.Empty);
-        
-        Analytics.TrackGameExported(GameService.LoadedGame);
+        await GameService.ExportToDownload();
     }
 
     private async Task OpenDemo()

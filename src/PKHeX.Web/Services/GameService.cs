@@ -4,7 +4,8 @@ using PKHeX.Facade.Repositories;
 namespace PKHeX.Web.Services;
 
 public class GameService(
-    AnalyticsService analytics)
+    AnalyticsService analytics,
+    JsService js)
 {
     public Game? Game { get; private set; }
     public Game LoadedGame => Game ?? throw new NullReferenceException("Expected game to be loaded, but it was null.");
@@ -43,5 +44,18 @@ public class GameService(
 
         var bytes = Game.ToByteArray();
         return new MemoryStream(bytes);
+    }
+
+    /// <summary>
+    /// Saving hands the user a fresh copy and never writes over anything. The original save - wherever it
+    /// came from, a linked folder or a file picker - is left exactly as it was found.
+    /// </summary>
+    public async Task ExportToDownload()
+    {
+        ArgumentNullException.ThrowIfNull(Game, nameof(Game));
+
+        await js.DownloadFile(Export(), FileName ?? string.Empty);
+
+        analytics.TrackGameExported(Game);
     }
 }

@@ -39,7 +39,7 @@
 
         // var firstPokemon = GameService.Game!.Trainer.Party.Pokemons.First();
         // Navigation.NavigateToPokemon(PokemonSource.Party, firstPokemon.UniqueId);
-        Navigation.NavigateToHomePage();
+        Navigation.NavigateToTrainer();
         // Navigation.NavigateToSearchEncounter();
         // Navigation.NavigateToPokemonBox();
         // Navigation.NavigateToPlugIns();
@@ -64,7 +64,7 @@
     {
         if (GameService.IsLoaded)
         {
-            Navigation.NavigateTo("/");
+            Navigation.NavigateToTrainer();
         }
     }
 
