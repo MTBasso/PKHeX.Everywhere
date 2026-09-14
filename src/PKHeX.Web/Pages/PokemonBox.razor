@@ -1,17 +1,24 @@
 @page "/pokemon-box"
+@page "/party"
 @using PKHeX.Core
 @inject NavigationManager Navigate
 @inject ClipboardService Clipboard
 @inject INotificationService Notification
 @inject LoadPokemonService LoadPokemonService
 
-<PageTitle>Pokemon Box</PageTitle>
+<PageTitle>Storage</PageTitle>
 
 <Flex Direction="FlexDirection.Vertical" Style="width: 100%; gap: 20px;">
     <PageHeader BackIcon="true" Style="max-width: 100%">
-        <TitleTemplate>Box</TitleTemplate>
+        <TitleTemplate>Storage</TitleTemplate>
 
         <PageHeaderExtra>
+            <Button Type="@ButtonType.Default"
+                    Icon="@(_showGrid ? IconType.Outline.Table : IconType.Outline.Appstore)"
+                    OnClick="() => _showGrid = !_showGrid">
+                @(_showGrid ? "Table" : "Grid")
+            </Button>
+
             <ButtonOrMenu Actions="ExtraActions" />
 
             @* Helper for loading *.pk files *@
@@ -19,19 +26,47 @@
         </PageHeaderExtra>
     </PageHeader>
 
-    <PokemonTable 
-        DataSource="@PokemonList" 
-        Source="PokemonSource.Box" 
-        Selectable
-        @bind-SelectedPokemons="_selectedPokemonList" />
+    @if (_showGrid)
+    {
+        <PokemonGrid
+            PartySlots="@PartySlots"
+            BoxSlots="@BoxSlots"
+            SlotsPerBox="@SlotsPerBox"
+            Selectable
+            @bind-SelectedPokemons="_selectedPokemonList" />
+    }
+    else
+    {
+        @* The table takes a single Source for every row, so party and box cannot share one table without
+           party rows navigating as though they were box rows. Two tables, each with its own Source. *@
+        @if (PartyList.Count > 0)
+        {
+            <div class="list-section">
+                <h3 class="list-section-title">Party</h3>
+                <PokemonTable
+                    DataSource="@PartyList"
+                    Source="PokemonSource.Party" />
+            </div>
+        }
 
+        <div class="list-section">
+            <h3 class="list-section-title">Boxes</h3>
+            <PokemonTable
+                DataSource="@PokemonList"
+                Source="PokemonSource.Box"
+                Selectable
+                @bind-SelectedPokemons="_selectedPokemonList" />
+        </div>
+    }
 </Flex>
 
 @code {
     [Inject] public required GameService GameService { get; set; }
     [Inject] public required JsService Js { get; set; }
-    
+
     private InputFile _inputGameFile = default!;
+
+    private bool _showGrid = true;
 
     private IList<ButtonOrMenu.ButtonAction> ExtraActions => new List<ButtonOrMenu.ButtonAction>
     {
@@ -64,8 +99,19 @@
         },
     };
 
+    /// The table view still wants only the occupied box slots; the grid wants every position.
     private IList<Pokemon> PokemonList => GameService.Game?.Trainer.PokemonBox.All
         .Where(p => p.Species != Species.None).ToList() ?? [];
+
+    private IList<Pokemon> BoxSlots => GameService.Game?.Trainer.PokemonBox.All ?? [];
+
+    private IList<Pokemon> PartySlots => GameService.Game?.Trainer.Party.Pokemons ?? [];
+
+    /// The table view lists only occupied slots, so party gets the same filtering the box list gets.
+    private IList<Pokemon> PartyList => PartySlots
+        .Where(p => p.Species != Species.None).ToList();
+
+    private int SlotsPerBox => GameService.Game?.SaveFile.BoxSlotCount ?? 30;
 
     private IList<Pokemon> _selectedPokemonList = [];
 
@@ -77,13 +123,15 @@
 
     private Task HandleExportShowdownClick()
     {
-        if (PokemonList.Count != 0)
+        var toBeExported = _selectedPokemonList.Any() ? _selectedPokemonList : PokemonList;
+
+        if (toBeExported.Count != 0)
         {
-            Clipboard.WriteTextAsync(PokemonList.Showdown());
+            Clipboard.WriteTextAsync(toBeExported.Showdown());
             _ = Notification.Open(new()
             {
                 Message = "Showdown copied to clipboard",
-                Description = $"{PokemonList.Count} entries",
+                Description = $"{toBeExported.Count} entries",
                 NotificationType = NotificationType.Success,
             });
         }
@@ -109,8 +157,7 @@
     {
         using MemoryStream ms = new MemoryStream();
         await e.File.OpenReadStream(2 * 1024 * 1000).CopyToAsync(ms);
-        
+
         LoadPokemonService.Load(ms.ToArray());
     }
-
 }

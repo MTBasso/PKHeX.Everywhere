@@ -1,0 +1,174 @@
+@using PKHeX.Core
+@inject NavigationManager Navigation
+
+<div class="grid-shell">
+    <div class="box-tabs">
+        @foreach (var tab in Tabs)
+        {
+            var current = tab;
+            <button type="button"
+                    class="box-tab @(current.Key == _activeKey ? "is-active" : "") @(current.Source == PokemonSource.Party ? "is-party" : "")"
+                    @onclick="() => _activeKey = current.Key">
+                @current.Label
+            </button>
+        }
+    </div>
+
+    <div class="box-grid" style="@($"grid-template-columns: repeat({ActiveTab.Columns}, minmax(0, 1fr));")">
+        @foreach (var slot in ActiveTab.Slots)
+        {
+            var current = slot;
+
+            @if (current.Pokemon is null)
+            {
+                <div class="slot slot-empty"></div>
+            }
+            else
+            {
+                var pokemon = current.Pokemon;
+                <div class="slot @(IsSelected(pokemon) ? "is-selected" : "")"
+                     role="button"
+                     tabindex="0"
+                     title="@Describe(pokemon)"
+                     @onclick="() => HandleOpen(pokemon, current.Source)">
+
+                    <PokemonIcon Species="@pokemon.Species" Form="@pokemon.Form.Form" Size="82%"/>
+
+                    <span class="slot-level">Lv.@pokemon.Level</span>
+
+                    @if (pokemon.IsShiny)
+                    {
+                        <span class="slot-shiny" title="Shiny">*</span>
+                    }
+
+                    @if (Selectable)
+                    {
+                        <span class="slot-select @(IsSelected(pokemon) ? "is-on" : "")"
+                              title="Select"
+                              @onclick:stopPropagation="true"
+                              @onclick="() => ToggleSelection(pokemon)"></span>
+                    }
+                </div>
+            }
+        }
+    </div>
+
+    <div class="box-footer">
+        <span>@ActiveTab.Slots.Count(s => s.Pokemon is not null)/@ActiveTab.Slots.Count</span>
+        <span>Total @TotalOccupied</span>
+    </div>
+</div>
+
+@code {
+    /// Party and boxes are the same thing to this component - a fixed run of slots with a label - so they
+    /// render as sibling tabs rather than as separate pages.
+    [Parameter] public IList<Pokemon> PartySlots { get; set; } = [];
+
+    /// The full box slot list straight from the save, empty slots included: a box is a fixed grid of
+    /// positions, so the empties are part of the data rather than something to filter away.
+    [Parameter] public IList<Pokemon> BoxSlots { get; set; } = [];
+
+    /// PartyData holds only the filled slots, but a party is six positions whether or not they are
+    /// occupied - so the count is fixed here rather than taken from the data.
+    [Parameter] public int PartySlotCount { get; set; } = 6;
+
+    [Parameter] public int SlotsPerBox { get; set; } = 30;
+    [Parameter] public int Columns { get; set; } = 6;
+
+    [Parameter] public bool Selectable { get; set; }
+    [Parameter] public IList<Pokemon> SelectedPokemons { get; set; } = [];
+    [Parameter] public EventCallback<IList<Pokemon>> SelectedPokemonsChanged { get; set; }
+
+    private string _activeKey = PartyKey;
+
+    private const string PartyKey = "party";
+
+    private int TotalOccupied => PartySlots.Count(IsOccupied) + BoxSlots.Count(IsOccupied);
+
+    private int BoxCount => SlotsPerBox <= 0
+        ? 0
+        : (int)Math.Ceiling(BoxSlots.Count / (double)SlotsPerBox);
+
+    private IReadOnlyList<GridTab> Tabs
+    {
+        get
+        {
+            var tabs = new List<GridTab>();
+
+            if (PartySlotCount > 0)
+            {
+                tabs.Add(new GridTab(
+                    PartyKey,
+                    "PARTY",
+                    PokemonSource.Party,
+                    SlotsFrom(PartySlots, 0, PartySlotCount, PokemonSource.Party),
+                    Math.Min(Columns, PartySlotCount)));
+            }
+
+            for (var box = 0; box < BoxCount; box++)
+            {
+                tabs.Add(new GridTab(
+                    $"box-{box}",
+                    $"BOX {box + 1}",
+                    PokemonSource.Box,
+                    SlotsFrom(BoxSlots, box * SlotsPerBox, SlotsPerBox, PokemonSource.Box),
+                    Columns));
+            }
+
+            return tabs;
+        }
+    }
+
+    private GridTab ActiveTab => Tabs.FirstOrDefault(t => t.Key == _activeKey)
+                                 ?? Tabs.FirstOrDefault()
+                                 ?? new GridTab(PartyKey, "PARTY", PokemonSource.Party, [], Columns);
+
+    private static IReadOnlyList<Slot> SlotsFrom(IList<Pokemon> source, int start, int count, PokemonSource kind) =>
+        Enumerable.Range(0, count)
+            .Select(offset =>
+            {
+                var index = start + offset;
+                var pokemon = index < source.Count ? source[index] : null;
+                return new Slot(index, IsOccupied(pokemon) ? pokemon : null, kind);
+            })
+            .ToList();
+
+    private static bool IsOccupied(Pokemon? pokemon) => pokemon is not null && pokemon.Species != Species.None;
+
+    private bool IsSelected(Pokemon pokemon) => SelectedPokemons.Contains(pokemon);
+
+    private static string Describe(Pokemon pokemon) => $"{pokemon.Species.Name} - Lv.{pokemon.Level}";
+
+    private void HandleOpen(Pokemon pokemon, PokemonSource source)
+    {
+        // UniqueId reads through to the underlying entity and can throw on data this app cannot
+        // represent; a slot that will not open should not take the page down with it.
+        try
+        {
+            Navigation.NavigateToPokemon(source, pokemon.UniqueId);
+        }
+        catch
+        {
+            // ignored - the tile stays put
+        }
+    }
+
+    private Task ToggleSelection(Pokemon pokemon)
+    {
+        var next = SelectedPokemons.ToList();
+
+        if (!next.Remove(pokemon)) next.Add(pokemon);
+
+        SelectedPokemons = next;
+        return SelectedPokemonsChanged.InvokeAsync(next);
+    }
+
+    private record Slot(int Index, Pokemon? Pokemon, PokemonSource Source);
+
+    private record GridTab(
+        string Key,
+        string Label,
+        PokemonSource Source,
+        IReadOnlyList<Slot> Slots,
+        int Columns);
+}

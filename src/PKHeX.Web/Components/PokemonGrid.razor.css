@@ -1,0 +1,142 @@
+/*
+    Colours are deliberately expressed as translucent neutrals rather than fixed hex values: the app
+    switches between AntDesign's light and dark themes at runtime, and a slot has to sit correctly on
+    either ground without knowing which one it is on.
+*/
+
+.grid-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.box-tabs {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+}
+
+.box-tab {
+    flex: 0 0 auto;
+    padding: 4px 12px;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: inherit;
+    background: rgba(128, 128, 128, 0.08);
+    border: 1px solid rgba(128, 128, 128, 0.25);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.box-tab:hover {
+    background: rgba(128, 128, 128, 0.18);
+}
+
+.box-tab.is-active {
+    background: rgba(24, 144, 255, 0.18);
+    border-color: rgba(24, 144, 255, 0.65);
+}
+
+.box-grid {
+    display: grid;
+    gap: 6px;
+    width: 100%;
+    max-width: 620px;
+}
+
+.slot {
+    position: relative;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(128, 128, 128, 0.10);
+    border: 1px solid rgba(128, 128, 128, 0.22);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.12s ease, border-color 0.12s ease, transform 0.08s ease;
+}
+
+.slot:hover {
+    background: rgba(128, 128, 128, 0.20);
+    border-color: rgba(128, 128, 128, 0.45);
+    transform: translateY(-1px);
+}
+
+.slot:focus-visible {
+    outline: 2px solid rgba(24, 144, 255, 0.9);
+    outline-offset: 1px;
+}
+
+.slot.is-selected {
+    background: rgba(24, 144, 255, 0.20);
+    border-color: rgba(24, 144, 255, 0.75);
+}
+
+/* An empty slot is a position, not a gap - it stays visible so the grid keeps its shape. */
+.slot-empty {
+    background: rgba(128, 128, 128, 0.04);
+    border-style: dashed;
+    border-color: rgba(128, 128, 128, 0.18);
+    cursor: default;
+}
+
+/* PokemonIcon sizes itself from the Size parameter; it only needs to stay out of the click path */
+.slot ::deep img {
+    pointer-events: none;
+}
+
+.slot-level {
+    position: absolute;
+    right: 3px;
+    bottom: 2px;
+    font-size: 10px;
+    line-height: 1;
+    opacity: 0.75;
+    pointer-events: none;
+}
+
+.slot-shiny {
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    font-size: 12px;
+    line-height: 1;
+    color: #f5c518;
+    pointer-events: none;
+}
+
+.slot-select {
+    position: absolute;
+    right: 3px;
+    top: 3px;
+    width: 13px;
+    height: 13px;
+    border: 1px solid rgba(128, 128, 128, 0.6);
+    border-radius: 2px;
+    background: rgba(128, 128, 128, 0.15);
+    opacity: 0;
+    transition: opacity 0.12s ease;
+}
+
+.slot:hover .slot-select,
+.slot-select.is-on {
+    opacity: 1;
+}
+
+.slot-select.is-on {
+    background: rgba(24, 144, 255, 0.95);
+    border-color: rgba(24, 144, 255, 1);
+}
+
+.box-footer {
+    display: flex;
+    justify-content: space-between;
+    max-width: 620px;
+    font-size: 12px;
+    opacity: 0.6;
+}

@@ -1,0 +1,13 @@
+.list-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.list-section-title {
+    margin: 0;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.6;
+}
