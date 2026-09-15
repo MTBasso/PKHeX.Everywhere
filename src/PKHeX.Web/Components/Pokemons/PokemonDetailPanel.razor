@@ -1,0 +1,89 @@
+@using PKHeX.Facade.Pokemons
+@using PKHeX.Web.Plugins
+@using PKHeX.Web.Services.Plugins
+@inject GameService GameService
+@inject AnalyticsService Analytics
+@inject PlugInRuntime PlugInRuntime
+@inject INotificationService Notification
+
+@*
+    Pokedex mode edits a Pokemon beside the box instead of navigating away from it; on a phone the same
+    panel rises from the bottom.
+
+    Like PokemonPage, this edits a *clone* and commits through Trainer.AddOrUpdate. Editing the live
+    object would let a half-finished edit reach the save with no way to back out.
+*@
+
+<aside class="detail-panel">
+    <header class="detail-head">
+        <PokemonIcon Species="@Pokemon.Species" Form="@Pokemon.Form.Form" Size="48px"/>
+
+        <div class="detail-headings">
+            <span class="detail-name">@DisplayName</span>
+            <span class="detail-sub">@Pokemon.Species.Name &middot; Lv.@Pokemon.Level &middot; @SourceLabel</span>
+        </div>
+
+        <button type="button" class="detail-close" title="Close" @onclick="HandleClose">&times;</button>
+    </header>
+
+    @if (_editing is not null)
+    {
+        <div class="detail-editor">
+            <PokemonEdit Pokemon="_editing" PokemonChanged="HandleEdited"/>
+        </div>
+
+        <div class="detail-actions">
+            <Button Type="@ButtonType.Primary" Block OnClick="HandleApply">Apply changes</Button>
+        </div>
+    }
+</aside>
+
+@code {
+    [Parameter, EditorRequired] public required Pokemon Pokemon { get; set; }
+    [Parameter] public required PokemonSource Source { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnApplied { get; set; }
+
+    private Pokemon? _editing;
+    private Pokemon? _editingFor;
+
+    protected override void OnParametersSet()
+    {
+        // Re-clone when the panel is pointed at a different Pokemon, and only then - rebuilding on every
+        // render would throw away whatever the user is part-way through typing.
+        if (ReferenceEquals(_editingFor, Pokemon)) return;
+
+        _editingFor = Pokemon;
+        _editing = Pokemon.Clone();
+    }
+
+    private string DisplayName => Pokemon.NicknameSet && !string.IsNullOrWhiteSpace(Pokemon.Nickname)
+        ? Pokemon.Nickname
+        : Pokemon.Species.Name;
+
+    private string SourceLabel => Source == PokemonSource.Party ? "Party" : "Box";
+
+    private void HandleEdited(Pokemon edited) => _editing = edited;
+
+    private Task HandleClose() => OnClose.InvokeAsync();
+
+    private async Task HandleApply()
+    {
+        if (_editing is null || !GameService.IsLoaded) return;
+
+        GameService.LoadedGame.Trainer.AddOrUpdate(Pokemon.UniqueId, _editing, Source);
+
+        await PlugInRuntime.RunAll<IRunOnPokemonSave>(h => h.OnPokemonSaved(_editing));
+
+        Analytics.TrackPokemon("pokemon_saved", _editing, Source);
+
+        _ = Notification.Open(new()
+        {
+            Message = "Changes applied",
+            Description = "Use Save in the top bar to export the updated file.",
+            NotificationType = NotificationType.Success,
+        });
+
+        await OnApplied.InvokeAsync();
+    }
+}

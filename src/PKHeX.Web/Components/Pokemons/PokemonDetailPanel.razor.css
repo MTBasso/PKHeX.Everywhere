@@ -1,0 +1,225 @@
+/*
+    Two shapes, one component: a column beside the box on a desktop, and a sheet that rises from the
+    bottom edge on a phone. Neutral translucency so it reads correctly in both UI modes and both themes;
+    pokedex.css repaints it.
+*/
+
+.detail-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex: 1 1 460px;
+    min-width: 0;
+    align-self: stretch;
+    padding: 14px;
+    border: 1px solid rgba(128, 128, 128, 0.25);
+    border-radius: 3px;
+    background: rgba(128, 128, 128, 0.06);
+}
+
+.detail-editor {
+    min-width: 0;
+}
+
+/* PokemonEdit brings its own page header, which duplicates the panel's own heading */
+.detail-editor ::deep .ant-page-header {
+    display: none;
+}
+
+.detail-actions {
+    margin-top: auto;
+}
+
+.detail-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.detail-headings {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.detail-name {
+    font-size: 16px;
+    line-height: 1.2;
+}
+
+.detail-shiny {
+    margin-left: 4px;
+    color: #f5c518;
+}
+
+.detail-sub {
+    font-size: 12px;
+    opacity: 0.65;
+}
+
+.detail-types {
+    display: flex;
+    gap: 4px;
+    margin-top: 2px;
+}
+
+.detail-close {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    font-size: 18px;
+    line-height: 1;
+    color: inherit;
+    background: transparent;
+    border: 1px solid rgba(128, 128, 128, 0.3);
+    border-radius: 2px;
+    cursor: pointer;
+    opacity: 0.6;
+}
+
+.detail-close:hover {
+    opacity: 1;
+}
+
+.detail-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 12px;
+}
+
+.detail-fact {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.detail-fact-label {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.55;
+}
+
+.detail-fact-value {
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.detail-section-title {
+    margin: 0 0 6px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.55;
+}
+
+.detail-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.detail-stat {
+    display: grid;
+    grid-template-columns: 30px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+}
+
+.detail-stat-label {
+    opacity: 0.7;
+}
+
+.detail-stat-bar {
+    height: 6px;
+    border-radius: 2px;
+    background: rgba(128, 128, 128, 0.22);
+    overflow: hidden;
+}
+
+.detail-stat-fill {
+    display: block;
+    height: 100%;
+    background: rgba(24, 144, 255, 0.75);
+}
+
+.detail-stat-nums {
+    font-variant-numeric: tabular-nums;
+}
+
+.detail-stat-ev {
+    opacity: 0.45;
+}
+
+.detail-stat-legend {
+    margin: 6px 0 0;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.4;
+}
+
+.detail-moves {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.detail-move {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 4px 8px;
+    border: 1px solid rgba(128, 128, 128, 0.2);
+    border-radius: 2px;
+    font-size: 12px;
+}
+
+.detail-move-pp {
+    opacity: 0.5;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------- phone: a sheet -- */
+
+@media (max-width: 860px) {
+    .detail-panel {
+        position: fixed;
+        inset: auto 0 0 0;
+        z-index: 40;
+        flex: none;
+        width: auto;
+        max-height: 82vh;
+        overflow-y: auto;
+        border-radius: 10px 10px 0 0;
+        border-bottom: none;
+        /* opaque rather than translucent: it sits over the grid, not beside it */
+        background: Canvas;
+        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4);
+        animation: detail-rise 180ms ease-out;
+    }
+}
+
+@keyframes detail-rise {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .detail-panel {
+        animation: none;
+    }
+}
