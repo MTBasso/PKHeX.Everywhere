@@ -127,8 +127,15 @@
     private SaveLibraryService.FolderState? _folder;
     private IReadOnlyList<SaveLibraryService.LibraryEntry> _entries = [];
 
-    protected override async Task OnInitializedAsync()
+    /// <summary>
+    /// Runs after the first render rather than on initialise: these are all JS interop calls, and doing
+    /// them here is what makes a linked folder come back by itself on a refresh instead of waiting for
+    /// the user to visit this tab again.
+    /// </summary>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (!firstRender) return;
+
         _supported = await Library.IsSupported();
 
         if (_supported)
@@ -141,6 +148,7 @@
         }
 
         _ready = true;
+        StateHasChanged();
     }
 
     private async Task PickFolder()
@@ -175,6 +183,8 @@
     private async Task Rescan()
     {
         _scanning = true;
+        StateHasChanged();
+
         try
         {
             _entries = await Library.Scan();
@@ -182,6 +192,7 @@
         finally
         {
             _scanning = false;
+            StateHasChanged();
         }
     }
 
