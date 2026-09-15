@@ -1,0 +1,366 @@
+/* ==========================================================================
+   POKÉDEX THEME
+   Companion to STYLE_GUIDE.md — read that first for rationale.
+
+   Two layers:
+     SHELL  = app chrome (bars, tabs, panels, buttons)   → red/black plastic
+     SCREEN = anywhere Pokémon data lives (boxes, lists)  → green LCD glass
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+:root {
+  /* ---- shell (device plastic) ---- */
+  --shell-red: #D6362B;
+  --shell-red-dark: #9E2419;
+  --shell-red-darker: #6E1810;
+  --shell-black: #1C1C1E;
+  --shell-charcoal: #2B2B2E;
+  --shell-screw: #4A4A4E;
+
+  /* ---- screen (monochrome LCD ramp — do not add a 5th shade) ---- */
+  --screen-darkest: #0F380F;   /* text / filled pixels */
+  --screen-dark: #306230;      /* secondary text, borders */
+  --screen-mid: #8BAC0F;       /* hover / active fill */
+  --screen-light: #9BBC0F;     /* screen background */
+
+  /* ---- indicator lights (functional, not decorative) ---- */
+  --lens-blue: #2F86D6;
+  --lens-blue-glow: rgba(47, 134, 214, 0.55);
+  --lens-amber: #F2B705;
+  --lens-amber-glow: rgba(242, 183, 5, 0.55);
+  --lens-off: #4A4A4E;
+
+  /* ---- neutrals ---- */
+  --cream: #F5F3E7;
+  --cream-dim: #D8D4C2;
+
+  /* ---- type ---- */
+  --font-display: 'Press Start 2P', monospace;
+  --font-data: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* ---- structure ---- */
+  --radius-shell: 14px;
+  --radius-screen: 6px;
+  --radius-chip: 3px;
+  --bezel-width: 6px;
+
+  --shadow-shell: 0 6px 0 var(--shell-red-darker), 0 10px 18px rgba(0,0,0,0.35);
+  --shadow-screen-inset: inset 0 0 0 2px var(--shell-black),
+                          inset 0 2px 10px rgba(0,0,0,0.45);
+}
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+
+.pokedex-app {
+  background: var(--shell-charcoal);
+  color: var(--cream);
+  font-family: var(--font-data);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.pokedex-app *:focus-visible {
+  outline: 2px solid var(--lens-blue);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   SHELL — header bar with lens-lights + status readout
+   ========================================================================== */
+
+.dex-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 18px;
+  background: var(--shell-red);
+  border-bottom: var(--bezel-width) solid var(--shell-black);
+  box-shadow: var(--shadow-shell);
+}
+
+.dex-header__lenses {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.status-led {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--lens-off);
+  border: 2px solid var(--shell-black);
+  transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+
+.status-led--loaded { background: var(--lens-blue); box-shadow: 0 0 6px var(--lens-blue-glow); }
+.status-led--unsaved { background: var(--lens-amber); box-shadow: 0 0 6px var(--lens-amber-glow); }
+
+.dex-header__title {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  color: var(--cream);
+  flex: 1;
+}
+
+.dex-header__readout {
+  display: flex;
+  gap: 10px;
+}
+
+.dex-counter {
+  font-family: var(--font-display);
+  font-size: 10px;
+  background: var(--shell-black);
+  color: var(--screen-light);
+  padding: 6px 10px;
+  border-radius: var(--radius-chip);
+  border: 1px solid var(--shell-red-darker);
+}
+
+.dex-counter__value { color: var(--screen-mid); margin-left: 4px; }
+
+/* ==========================================================================
+   SHELL — cartridge-style tabs (box selector, save selector)
+   ========================================================================== */
+
+.tab-cartridge-row {
+  display: flex;
+  gap: 2px;
+  background: var(--shell-black);
+  padding: 4px 4px 0;
+}
+
+.tab-cartridge {
+  font-family: var(--font-data);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 16px;
+  background: var(--shell-charcoal);
+  color: var(--cream-dim);
+  border: none;
+  border-top: 3px solid transparent;
+  border-radius: 4px 4px 0 0;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.tab-cartridge:hover { background: #3A3A3D; color: var(--cream); }
+
+.tab-cartridge[aria-selected="true"] {
+  background: var(--shell-red);
+  border-top-color: var(--cream);
+  color: var(--cream);
+}
+
+/* ==========================================================================
+   SCREEN — the LCD panel wrapper. Everything data-related lives inside this.
+   ========================================================================== */
+
+.pokedex-screen {
+  position: relative;
+  background: var(--screen-light);
+  border-radius: var(--radius-screen);
+  box-shadow: var(--shadow-screen-inset);
+  padding: 14px;
+  overflow: hidden;
+  color: var(--screen-darkest);
+}
+
+/* dot-matrix / scanline texture — subtle, screen areas only */
+.pokedex-screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(15, 56, 15, 0.06) 0px,
+      rgba(15, 56, 15, 0.06) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  mix-blend-mode: multiply;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .screen-flicker {
+    animation: dex-flicker 180ms ease-out;
+  }
+}
+
+@keyframes dex-flicker {
+  0% { filter: brightness(1); }
+  40% { filter: brightness(1.12); }
+  100% { filter: brightness(1); }
+}
+
+/* ==========================================================================
+   SCREEN — dex list row (seen/obtained list, image-4 style)
+   ========================================================================== */
+
+.dex-list {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+.dex-list-row {
+  display: grid;
+  grid-template-columns: 20px 32px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(15, 56, 15, 0.15);
+  cursor: pointer;
+}
+
+.dex-list-row:hover,
+.dex-list-row:focus-visible {
+  background: var(--screen-mid);
+  color: var(--screen-light);
+}
+
+.dex-status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--screen-darkest);
+  background: transparent; /* seen only */
+}
+
+.dex-status-dot--owned {
+  background: var(--screen-darkest); /* filled = owned/caught */
+}
+
+.dex-list-row:hover .dex-status-dot,
+.dex-list-row:hover .dex-status-dot--owned {
+  border-color: var(--screen-light);
+  background: var(--screen-light);
+}
+.dex-list-row:hover .dex-status-dot { background: transparent; }
+
+.dex-list-row__number {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.dex-list-row__name {
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+/* ==========================================================================
+   SCREEN — box storage grid
+   ========================================================================== */
+
+.box-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+.box-slot {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 56, 15, 0.06);
+  border: 1px solid rgba(15, 56, 15, 0.18);
+  border-radius: var(--radius-chip);
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.box-slot--empty {
+  background: rgba(15, 56, 15, 0.03);
+  border-style: dashed;
+}
+
+.box-slot:not(.box-slot--empty):hover {
+  background: var(--screen-mid);
+  border-color: var(--screen-darkest);
+  cursor: pointer;
+}
+
+.box-slot img {
+  image-rendering: pixelated;
+  max-width: 80%;
+  max-height: 80%;
+}
+
+/* ==========================================================================
+   SHELL — buttons
+   ========================================================================== */
+
+.btn-shell {
+  font-family: var(--font-data);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 9px 18px;
+  background: var(--shell-red);
+  color: var(--cream);
+  border: none;
+  border-bottom: 3px solid var(--shell-red-darker);
+  border-radius: var(--radius-chip);
+  cursor: pointer;
+  transition: transform 80ms ease, border-bottom-width 80ms ease;
+}
+
+.btn-shell:hover { filter: brightness(1.05); }
+
+.btn-shell:active {
+  transform: translateY(2px);
+  border-bottom-width: 1px;
+}
+
+.btn-shell--secondary {
+  background: var(--shell-black);
+  border-bottom-color: #000;
+}
+
+/* small square button meant to echo the D-pad language, for icon-only
+   actions (nav arrows, close, etc.) — not a literal d-pad graphic */
+.btn-dpad {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--shell-black);
+  border: 2px solid var(--shell-screw);
+  border-radius: 6px;
+  color: var(--cream);
+  cursor: pointer;
+}
+
+.btn-dpad:hover { border-color: var(--lens-blue); }
+
+/* ==========================================================================
+   BADGES / CHIPS
+   ========================================================================== */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-size: 9px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--shell-black);
+  color: var(--screen-light);
+}
+
+.chip--type-grass { background: #3D8C40; color: var(--cream); }
+.chip--type-poison { background: #8B3D9E; color: var(--cream); }
+.chip--type-fire { background: #D6362B; color: var(--cream); }
+.chip--type-water { background: #2F86D6; color: var(--cream); }
+/* extend per type as needed, keep saturation consistent across the set */

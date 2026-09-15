@@ -1,6 +1,7 @@
 import {decryptAes, encryptAes} from "./crypto/aes.ts";
 import {md5Hash} from "./crypto/md5.ts";
 import {downloadFileFromStream} from "./files/files.ts";
+import {setShellAttribute, setStylesheetEnabled} from "./ui/shell.ts";
 import {
     forgetSaveFolder,
     isSaveLibrarySupported,
@@ -33,6 +34,10 @@ declare global {
         scanSaveFolder: typeof scanSaveFolder;
         readSaveFile: typeof readSaveFile;
         
+        // ui shell
+        setShellAttribute: typeof setShellAttribute;
+        setStylesheetEnabled: typeof setStylesheetEnabled;
+
         // ui
         getWidth: () => number;
         hasPreferenceForDarkTheme: () => boolean;

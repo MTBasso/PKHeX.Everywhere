@@ -11,3 +11,19 @@
     text-transform: uppercase;
     opacity: 0.6;
 }
+
+/* Grid and detail sit side by side on a desktop; on a phone the panel becomes a sheet and leaves the
+   flow entirely, so the grid simply takes the full width. */
+.storage-split {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+/* The grid holds its natural width and the editor takes the rest of the screen - the panel carries the
+   full editing surface now, not a summary, so it needs real room rather than a fixed column. */
+.storage-split > .grid-shell {
+    flex: 0 0 auto;
+}

@@ -1,19 +1,28 @@
 @using PKHeX.Core
 @inject NavigationManager Navigation
+@inject UiModeService UiMode
 
 <div class="grid-shell">
-    <div class="box-tabs">
+    @* tab-cartridge-row / tab-cartridge come from the authored Pokedex theme sheet *@
+    <div class="box-tabs @(Pokedex ? "tab-cartridge-row" : "")">
         @foreach (var tab in Tabs)
         {
             var current = tab;
+            var selected = current.Key == _activeKey;
             <button type="button"
-                    class="box-tab @(current.Key == _activeKey ? "is-active" : "") @(current.Source == PokemonSource.Party ? "is-party" : "")"
+                    class="box-tab @(Pokedex ? "tab-cartridge" : "") @(selected ? "is-active" : "") @(current.Source == PokemonSource.Party ? "is-party" : "")"
+                    aria-selected="@(selected ? "true" : "false")"
                     @onclick="() => _activeKey = current.Key">
                 @current.Label
             </button>
         }
     </div>
 
+    @*
+        The style guide keeps the LCD treatment to panels where Pokemon data lives, so the screen wrapper
+        goes around the grid and nowhere else.
+    *@
+    <div class="grid-screen @(Pokedex ? "pokedex-screen" : "")">
     <div class="box-grid" style="@($"grid-template-columns: repeat({ActiveTab.Columns}, minmax(0, 1fr));")">
         @foreach (var slot in ActiveTab.Slots)
         {
@@ -21,12 +30,12 @@
 
             @if (current.Pokemon is null)
             {
-                <div class="slot slot-empty"></div>
+                <div class="slot slot-empty @(Pokedex ? "box-slot box-slot--empty" : "")"></div>
             }
             else
             {
                 var pokemon = current.Pokemon;
-                <div class="slot @(IsSelected(pokemon) ? "is-selected" : "")"
+                <div class="slot @(Pokedex ? "box-slot" : "") @(IsSelected(pokemon) ? "is-selected" : "") @(ReferenceEquals(OpenedPokemon, pokemon) ? "is-open" : "")"
                      role="button"
                      tabindex="0"
                      title="@Describe(pokemon)"
@@ -53,6 +62,8 @@
         }
     </div>
 
+    </div>
+
     <div class="box-footer">
         <span>@ActiveTab.Slots.Count(s => s.Pokemon is not null)/@ActiveTab.Slots.Count</span>
         <span>Total @TotalOccupied</span>
@@ -75,9 +86,19 @@
     [Parameter] public int SlotsPerBox { get; set; } = 30;
     [Parameter] public int Columns { get; set; } = 6;
 
+    /// When set, opening a slot raises this instead of navigating - Pokedex mode shows the Pokemon beside
+    /// the box rather than leaving the page. Carries the slot's own source: committing an edit writes to
+    /// the party or the box, so a party slot reported as a box slot would write to the wrong collection.
+    [Parameter] public EventCallback<SlotOpened> OnOpen { get; set; }
+
+    /// Drawn as the open slot, so the grid shows which Pokemon the detail panel is describing.
+    [Parameter] public Pokemon? OpenedPokemon { get; set; }
+
     [Parameter] public bool Selectable { get; set; }
     [Parameter] public IList<Pokemon> SelectedPokemons { get; set; } = [];
     [Parameter] public EventCallback<IList<Pokemon>> SelectedPokemonsChanged { get; set; }
+
+    private bool Pokedex => UiMode.IsPokedex;
 
     private string _activeKey = PartyKey;
 
@@ -139,8 +160,14 @@
 
     private static string Describe(Pokemon pokemon) => $"{pokemon.Species.Name} - Lv.{pokemon.Level}";
 
-    private void HandleOpen(Pokemon pokemon, PokemonSource source)
+    private async Task HandleOpen(Pokemon pokemon, PokemonSource source)
     {
+        if (OnOpen.HasDelegate)
+        {
+            await OnOpen.InvokeAsync(new SlotOpened(pokemon, source));
+            return;
+        }
+
         // UniqueId reads through to the underlying entity and can throw on data this app cannot
         // represent; a slot that will not open should not take the page down with it.
         try
@@ -162,6 +189,8 @@
         SelectedPokemons = next;
         return SelectedPokemonsChanged.InvokeAsync(next);
     }
+
+    public record SlotOpened(Pokemon Pokemon, PokemonSource Source);
 
     private record Slot(int Index, Pokemon? Pokemon, PokemonSource Source);
 

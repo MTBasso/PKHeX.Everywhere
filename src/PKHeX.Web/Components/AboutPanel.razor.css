@@ -1,0 +1,20 @@
+.about-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 4px 2px;
+}
+
+.about-line {
+    margin: 0;
+    font-size: 13px;
+    opacity: 0.75;
+}
+
+.about-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    margin-top: 6px;
+    font-size: 13px;
+}

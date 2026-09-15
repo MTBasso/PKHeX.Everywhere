@@ -65,3 +65,112 @@
 /*
     --- End top bar ---
 */
+
+/*
+    --- mobile navigation ---
+    The top row holds brand, navigation and actions, which does not fit on a phone - it wrapped into a
+    column. Below 860px the menu leaves the top row and becomes a bar along the bottom edge.
+*/
+.mobile-nav {
+    display: none;
+}
+
+@media (max-width: 860px) {
+    .top-bar {
+        flex-wrap: nowrap;
+        gap: 8px;
+        padding-inline: 10px;
+    }
+
+    /* the horizontal menu is what forced the wrap */
+    .top-bar .top-nav {
+        display: none !important;
+    }
+
+    .top-bar .ant-btn {
+        padding-inline: 10px;
+        font-size: 11px;
+    }
+
+    .mobile-nav {
+        position: fixed;
+        inset: auto 0 0 0;
+        z-index: 30;
+        display: flex;
+        align-items: stretch;
+        justify-content: space-around;
+        gap: 2px;
+        padding: 4px 6px;
+        border-top: 1px solid rgba(128, 128, 128, 0.25);
+        background: Canvas;
+    }
+
+    .mobile-nav-item {
+        display: flex;
+        flex: 1 1 0;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        padding: 6px 2px;
+        border-radius: 2px;
+        color: inherit;
+        opacity: 0.65;
+        text-decoration: none;
+    }
+
+    .mobile-nav-item.active {
+        opacity: 1;
+    }
+
+    .mobile-nav-label {
+        font-size: 10px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    /* keep the bottom bar from covering the end of the page */
+    .ant-layout-footer {
+        padding-bottom: 68px !important;
+    }
+}
+/*
+    --- End mobile navigation ---
+*/
+
+/*
+    --- narrow item selects ---
+    A squeezed select used to wrap its label one character per line, rendering "Poke Ball" vertically.
+    The label now truncates instead, and where the field is genuinely too narrow for any text the icon
+    carries the meaning on its own.
+*/
+.ant-descriptions-item-content {
+    min-width: 0;
+}
+
+/* Truncating is what stops the one-character-per-line wrap; it is the actual fix. */
+.item-select-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+/*
+    Where the screen is narrow enough that no label would fit legibly, the icon carries the meaning
+    alone. Driven by viewport rather than container width on purpose: container-type on a table cell
+    applies CSS containment to a <td>, which breaks the Descriptions table it is part of.
+*/
+@media (max-width: 860px) {
+    /*
+        Only the collapsed value shown in the closed select - the icon stands in for the name there
+        because there is no room for it. Inside the open dropdown the name is the only thing to pick by,
+        so it always stays: hiding it there left a list of unlabelled icons.
+    */
+    .ant-select-selection-item .item-select-name {
+        display: none;
+    }
+}
+/*
+    --- End narrow item selects ---
+*/

@@ -1,0 +1,489 @@
+/*
+    ============================================================================
+    Pokedex UI mode
+    ============================================================================
+
+    Everything here is gated behind [data-ui-mode="pokedex"] on the root element, so the default
+    interface is completely untouched by this file. The mode carries its own light and dark palettes -
+    [data-theme] is written onto the root alongside the mode, because AntDesign keeps the theme in .NET
+    state where CSS cannot see it.
+
+    Shape of the look: flat panels with visible borders, square corners, tight density, a warm terracotta
+    bar across the top, and no rounded "web app" softness anywhere.
+*/
+
+/*
+    The palette below is a mapping layer, not a second palette: every value resolves to a token from
+    pokedex-theme.css. The rules in this file were written before that sheet existed and cover a lot of
+    app surface, so pointing their tokens at the authored ones adopts the design without rewriting them.
+
+    Per STYLE_GUIDE.md the shell is red/black plastic; the green LCD treatment belongs only to panels
+    where Pokemon data lives, which is why no --pk-* token here is green.
+*/
+:root[data-ui-mode="pokedex"] {
+    /* light theme: same plastic shell, paper-coloured page */
+    --pk-bg: var(--cream-dim);
+    --pk-panel: var(--cream);
+    --pk-panel-alt: #ECE7D6;
+    --pk-border: #C9C2AE;
+    --pk-border-strong: #AFA793;
+    --pk-text: var(--shell-black);
+    --pk-muted: #5C5A52;
+    --pk-accent: var(--shell-red);
+    --pk-accent-hover: #E4483C;
+    --pk-on-accent: var(--cream);
+    --pk-bar: var(--shell-red);
+    --pk-slot: rgba(15, 56, 15, 0.06);
+    --pk-slot-empty: rgba(15, 56, 15, 0.03);
+    --pk-radius: var(--radius-chip);
+}
+
+:root[data-ui-mode="pokedex"][data-theme="dark"] {
+    --pk-bg: var(--shell-charcoal);
+    --pk-panel: var(--shell-black);
+    --pk-panel-alt: #37373B;
+    --pk-border: var(--shell-screw);
+    --pk-border-strong: #5E5E64;
+    --pk-text: var(--cream);
+    --pk-muted: var(--cream-dim);
+    --pk-accent: var(--shell-red);
+    --pk-accent-hover: #E4483C;
+    --pk-on-accent: var(--cream);
+    --pk-bar: var(--shell-red);
+    --pk-slot: rgba(15, 56, 15, 0.06);
+    --pk-slot-empty: rgba(15, 56, 15, 0.03);
+    --pk-radius: var(--radius-chip);
+}
+
+/* Type roles from the guide: display face for short labels only, mono for everything else. */
+:root[data-ui-mode="pokedex"] body {
+    font-family: var(--font-data);
+}
+
+:root[data-ui-mode="pokedex"] .logo,
+:root[data-ui-mode="pokedex"] .ant-page-header-heading-title {
+    font-family: var(--font-display);
+}
+
+:root[data-ui-mode="pokedex"] .ant-page-header-heading-title {
+    font-size: 13px;
+    letter-spacing: 0.5px;
+}
+
+:root[data-ui-mode="pokedex"] .logo {
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+
+/* ---------------------------------------------------------------- shell -- */
+
+:root[data-ui-mode="pokedex"],
+:root[data-ui-mode="pokedex"] body {
+    background: var(--pk-bg);
+    color: var(--pk-text);
+}
+
+:root[data-ui-mode="pokedex"] .ant-layout,
+:root[data-ui-mode="pokedex"] .ant-layout-content,
+:root[data-ui-mode="pokedex"] .site-layout-background {
+    background: var(--pk-bg);
+    color: var(--pk-text);
+}
+
+/* the warm bar across the top is the single strongest cue of this mode */
+:root[data-ui-mode="pokedex"] .top-bar,
+:root[data-ui-mode="pokedex"] .ant-layout-header.top-bar {
+    background: var(--pk-bar);
+    border-bottom: 2px solid rgba(0, 0, 0, 0.25);
+    height: auto;
+    min-height: 46px;
+    line-height: normal;
+    padding-block: 6px;
+}
+
+:root[data-ui-mode="pokedex"] .logo {
+    color: var(--pk-on-accent);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+:root[data-ui-mode="pokedex"] .top-bar .ant-menu,
+:root[data-ui-mode="pokedex"] .top-bar .ant-menu-horizontal {
+    background: transparent;
+    border-bottom: none;
+    color: var(--pk-on-accent);
+}
+
+:root[data-ui-mode="pokedex"] .top-bar .ant-menu-item,
+:root[data-ui-mode="pokedex"] .top-bar .ant-menu-submenu-title {
+    color: var(--pk-on-accent);
+    opacity: 0.82;
+    border-radius: var(--pk-radius);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 12px;
+}
+
+:root[data-ui-mode="pokedex"] .top-bar .ant-menu-item:hover,
+:root[data-ui-mode="pokedex"] .top-bar .ant-menu-submenu-title:hover,
+:root[data-ui-mode="pokedex"] .top-bar .ant-menu-item-selected {
+    color: var(--pk-on-accent);
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.22);
+}
+
+/* AntDesign draws the active-item underline; this mode marks selection with a block instead */
+:root[data-ui-mode="pokedex"] .top-bar .ant-menu-horizontal > .ant-menu-item::after,
+:root[data-ui-mode="pokedex"] .top-bar .ant-menu-horizontal > .ant-menu-submenu::after {
+    display: none !important;
+}
+
+/* --------------------------------------------------------------- panels -- */
+
+:root[data-ui-mode="pokedex"] .trainer-card,
+:root[data-ui-mode="pokedex"] .items-panel,
+:root[data-ui-mode="pokedex"] .save-card,
+:root[data-ui-mode="pokedex"] .library-empty,
+:root[data-ui-mode="pokedex"] .folder-help,
+:root[data-ui-mode="pokedex"] .ant-card,
+:root[data-ui-mode="pokedex"] .ant-descriptions-bordered {
+    background: var(--pk-panel);
+    border: 1px solid var(--pk-border);
+    border-radius: var(--pk-radius);
+    color: var(--pk-text);
+}
+
+:root[data-ui-mode="pokedex"] .trainer-card-head,
+:root[data-ui-mode="pokedex"] .items-panel-head {
+    background: var(--pk-panel-alt);
+    border-bottom: 1px solid var(--pk-border);
+}
+
+:root[data-ui-mode="pokedex"] .trainer-card-badge,
+:root[data-ui-mode="pokedex"] .save-card-gen {
+    background: var(--pk-accent);
+    border-color: var(--pk-accent);
+    color: var(--pk-on-accent);
+    border-radius: var(--pk-radius);
+    opacity: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+:root[data-ui-mode="pokedex"] .field-label,
+:root[data-ui-mode="pokedex"] .list-section-title,
+:root[data-ui-mode="pokedex"] .library-fallback-title,
+:root[data-ui-mode="pokedex"] .muted,
+:root[data-ui-mode="pokedex"] .save-card-path {
+    color: var(--pk-muted);
+    opacity: 1;
+}
+
+:root[data-ui-mode="pokedex"] .save-card:hover {
+    background: var(--pk-panel-alt);
+    border-color: var(--pk-border-strong);
+}
+
+:root[data-ui-mode="pokedex"] .save-card.is-current {
+    border-color: var(--pk-accent);
+    background: var(--pk-panel-alt);
+    box-shadow: inset 3px 0 0 var(--pk-accent);
+}
+
+/* ------------------------------------------------------------ box grid --- */
+
+:root[data-ui-mode="pokedex"] .grid-shell {
+    max-width: 660px;
+}
+
+@media (max-width: 860px) {
+    :root[data-ui-mode="pokedex"] .grid-shell {
+        max-width: 100%;
+    }
+}
+
+:root[data-ui-mode="pokedex"] .slot-level {
+    color: var(--pk-muted);
+    opacity: 1;
+    font-size: 9px;
+    letter-spacing: 0.04em;
+}
+
+:root[data-ui-mode="pokedex"] .slot-select.is-on {
+    background: var(--pk-accent);
+    border-color: var(--pk-accent);
+}
+
+:root[data-ui-mode="pokedex"] .box-footer {
+    color: var(--pk-muted);
+    opacity: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 11px;
+}
+
+/* --------------------------------------------------------- ant controls -- */
+
+:root[data-ui-mode="pokedex"] .ant-btn {
+    border-radius: var(--pk-radius);
+    border-color: var(--pk-border-strong);
+    background: var(--pk-panel);
+    color: var(--pk-text);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 12px;
+}
+
+:root[data-ui-mode="pokedex"] .ant-btn:hover {
+    border-color: var(--pk-accent);
+    color: var(--pk-accent);
+}
+
+:root[data-ui-mode="pokedex"] .ant-btn-primary {
+    background: var(--pk-accent);
+    border-color: var(--pk-accent);
+    color: var(--pk-on-accent);
+}
+
+:root[data-ui-mode="pokedex"] .ant-btn-primary:hover {
+    background: var(--pk-accent-hover);
+    border-color: var(--pk-accent-hover);
+    color: var(--pk-on-accent);
+}
+
+:root[data-ui-mode="pokedex"] .ant-btn-link {
+    background: transparent;
+    border-color: transparent;
+    color: var(--pk-accent);
+}
+
+:root[data-ui-mode="pokedex"] .ant-input,
+:root[data-ui-mode="pokedex"] .ant-input-number,
+:root[data-ui-mode="pokedex"] .ant-select-selector,
+:root[data-ui-mode="pokedex"] .ant-input-number-input {
+    background: var(--pk-panel-alt) !important;
+    border-color: var(--pk-border-strong) !important;
+    border-radius: var(--pk-radius) !important;
+    color: var(--pk-text) !important;
+}
+
+:root[data-ui-mode="pokedex"] .ant-table,
+:root[data-ui-mode="pokedex"] .ant-table-container,
+:root[data-ui-mode="pokedex"] .ant-table-cell {
+    background: var(--pk-panel);
+    color: var(--pk-text);
+    border-color: var(--pk-border);
+}
+
+:root[data-ui-mode="pokedex"] .ant-table-thead > tr > th {
+    background: var(--pk-panel-alt) !important;
+    color: var(--pk-muted) !important;
+    border-color: var(--pk-border) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 11px;
+}
+
+:root[data-ui-mode="pokedex"] .ant-tabs-tab {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 12px;
+    color: var(--pk-muted);
+}
+
+:root[data-ui-mode="pokedex"] .ant-tabs-tab-active .ant-tabs-tab-btn {
+    color: var(--pk-accent) !important;
+}
+
+:root[data-ui-mode="pokedex"] .ant-tabs-ink-bar {
+    background: var(--pk-accent);
+}
+
+:root[data-ui-mode="pokedex"] .ant-page-header {
+    background: transparent;
+    padding-inline: 0;
+}
+
+:root[data-ui-mode="pokedex"] .ant-page-header-heading-title {
+    color: var(--pk-text);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 18px;
+}
+
+/* ----------------------------------------------------- detail panel ------ */
+
+:root[data-ui-mode="pokedex"] .detail-panel {
+    background: var(--pk-panel);
+    border: 1px solid var(--pk-border);
+    border-radius: var(--pk-radius);
+    color: var(--pk-text);
+}
+
+:root[data-ui-mode="pokedex"] .detail-name {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+:root[data-ui-mode="pokedex"] .detail-sub,
+:root[data-ui-mode="pokedex"] .detail-fact-label,
+:root[data-ui-mode="pokedex"] .detail-section-title,
+:root[data-ui-mode="pokedex"] .detail-stat-legend,
+:root[data-ui-mode="pokedex"] .detail-stat-label {
+    color: var(--pk-muted);
+    opacity: 1;
+}
+
+:root[data-ui-mode="pokedex"] .detail-close {
+    border-color: var(--pk-border-strong);
+    border-radius: var(--pk-radius);
+}
+
+:root[data-ui-mode="pokedex"] .detail-stat-bar {
+    background: var(--pk-slot-empty);
+    border-radius: var(--pk-radius);
+}
+
+:root[data-ui-mode="pokedex"] .detail-stat-fill {
+    background: var(--pk-accent);
+}
+
+:root[data-ui-mode="pokedex"] .detail-move {
+    background: var(--pk-panel-alt);
+    border-color: var(--pk-border);
+    border-radius: var(--pk-radius);
+}
+
+/* the slot whose Pokemon the panel is describing */
+:root[data-ui-mode="pokedex"] .slot.is-open {
+    border-color: var(--pk-accent);
+    box-shadow: inset 0 0 0 2px var(--pk-accent);
+    background: var(--pk-panel-alt);
+}
+
+@media (max-width: 860px) {
+    :root[data-ui-mode="pokedex"] .detail-panel {
+        background: var(--pk-panel);
+        border-top: 2px solid var(--pk-accent);
+        border-radius: var(--pk-radius) var(--pk-radius) 0 0;
+    }
+}
+
+/* ----------------------------------------------------------- footer ------ */
+
+/*
+    The footer was a tall stack of centred paragraphs in default chrome. In this mode it is a compact
+    strip that matches the top bar, so the page is bracketed by the same colour top and bottom.
+*/
+:root[data-ui-mode="pokedex"] .ant-layout-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 2px 14px;
+    padding: 8px 16px;
+    background: var(--pk-bar);
+    color: var(--pk-on-accent);
+    border-top: 2px solid rgba(0, 0, 0, 0.25);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-align: center;
+}
+
+:root[data-ui-mode="pokedex"] .ant-layout-footer p {
+    margin: 0;
+}
+
+:root[data-ui-mode="pokedex"] .ant-layout-footer a {
+    color: var(--pk-on-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+:root[data-ui-mode="pokedex"] .ant-layout-footer .ant-divider {
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+/* ------------------------------------------------------- mobile nav ------ */
+
+@media (max-width: 860px) {
+    :root[data-ui-mode="pokedex"] .mobile-nav {
+        background: var(--pk-bar);
+        border-top: 2px solid rgba(0, 0, 0, 0.25);
+    }
+
+    :root[data-ui-mode="pokedex"] .mobile-nav-item {
+        color: var(--pk-on-accent);
+    }
+
+    :root[data-ui-mode="pokedex"] .mobile-nav-item.active {
+        background: rgba(0, 0, 0, 0.22);
+        border-radius: var(--pk-radius);
+    }
+}
+
+:root[data-ui-mode="pokedex"] .radar-label {
+    fill: var(--pk-text);
+    opacity: 0.95;
+}
+
+:root[data-ui-mode="pokedex"] .radar-shape {
+    fill: color-mix(in srgb, var(--pk-accent) 32%, transparent);
+    stroke: var(--pk-accent);
+}
+
+
+/* -------------------------------------------- selection on the LCD screen -- */
+
+/*
+    Selection and "open" have to stay legible against the LCD ramp, so they use the screen's own darkest
+    shade rather than the shell red - the guide keeps red for chrome, and red on green would fight.
+*/
+:root[data-ui-mode="pokedex"] .slot.is-selected {
+    background: var(--screen-mid);
+    border-color: var(--screen-darkest);
+}
+
+:root[data-ui-mode="pokedex"] .slot.is-open {
+    border-color: var(--screen-darkest);
+    box-shadow: inset 0 0 0 2px var(--screen-darkest);
+    background: var(--screen-mid);
+}
+
+:root[data-ui-mode="pokedex"] .slot-level {
+    color: var(--screen-darkest);
+    opacity: 0.75;
+}
+
+:root[data-ui-mode="pokedex"] .slot-select {
+    border-color: var(--screen-darkest);
+    background: rgba(15, 56, 15, 0.12);
+}
+
+:root[data-ui-mode="pokedex"] .slot-select.is-on {
+    background: var(--screen-darkest);
+    border-color: var(--screen-darkest);
+}
+
+:root[data-ui-mode="pokedex"] .box-footer {
+    color: var(--pk-muted);
+}
+
+/* ------------------------------------------------- shell header details -- */
+
+/*
+    The authored .dex-header supplies the plastic bar; these keep the app's own header pieces sitting
+    correctly inside it, since the theme was written against a simpler header than this one.
+*/
+:root[data-ui-mode="pokedex"] .dex-header {
+    flex-wrap: nowrap;
+}
+
+:root[data-ui-mode="pokedex"] .dex-header__title {
+    flex: 0 0 auto;
+}
+
+:root[data-ui-mode="pokedex"] .dex-header .top-nav {
+    flex: 1 1 auto;
+}

@@ -3,14 +3,29 @@
 @implements IDisposable
 @inject NavigationManager Navigation
 @inject GameService GameService
+@inject UiModeService UiMode
 @inject UserJourneyService UserJourneyService
 
-<Layout Style="min-height: 100vh">
+<Layout Style="min-height: 100vh" Class="@(UiMode.IsPokedex ? "pokedex-app" : "")">
     <NewsBanner />
     
-    <Header Class="top-bar">
+    <Header Class="@(UiMode.IsPokedex ? "top-bar dex-header" : "top-bar")">
 
-        <div class="logo">PKHeX.Web</div>
+        @*
+            Status lights from STYLE_GUIDE.md: blue means a save is loaded. The second lens stays dark -
+            it is specified as "unsaved changes", and the app has no dirty-state signal to drive it with,
+            so lighting it would be decoration pretending to be status.
+        *@
+        @if (UiMode.IsPokedex)
+        {
+            <div class="dex-header__lenses">
+                <span class="status-led @(GameService.IsLoaded ? "status-led--loaded" : "")"
+                      title="@(GameService.IsLoaded ? "Save loaded" : "No save loaded")"></span>
+                <span class="status-led" title="Unsaved changes (not tracked yet)"></span>
+            </div>
+        }
+
+        <div class="logo @(UiMode.IsPokedex ? "dex-header__title" : "")">PKHeX.Web</div>
 
         <Menu
             Class="top-nav"
@@ -115,7 +130,30 @@
             </div>
         </Content>
 
-    <PkHexFooter/>
+    @*
+        On a phone the top row cannot hold brand, navigation and actions at once - it wrapped into a
+        column. Navigation moves to a bar along the bottom edge, which also puts the destinations within
+        thumb reach. Hidden entirely on desktop, where the top row has space.
+    *@
+    <nav class="mobile-nav">
+        @foreach (var item in MenuItems)
+        {
+            @if (!item.VisibleWithoutGame && !GameService.IsLoaded) continue;
+
+            <NavLink class="mobile-nav-item"
+                     href="@($"/{item.Route}")"
+                     Match="@(string.IsNullOrEmpty(item.Route) ? NavLinkMatch.All : NavLinkMatch.Prefix)">
+                @if (item.Icon is not null)
+                {
+                    <Icon Type="@item.Icon" Theme="IconThemeType.Outline"/>
+                }
+                <span class="mobile-nav-label">@item.Label</span>
+            </NavLink>
+        }
+    </nav>
+
+    @* The footer was removed - it competed with the mobile bottom bar for the same edge. Its links and
+       the app name now live in Settings under About. *@
     <PokemonSyncToast/>
 
 </Layout>

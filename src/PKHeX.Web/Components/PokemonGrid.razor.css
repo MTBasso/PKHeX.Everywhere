@@ -4,11 +4,28 @@
     either ground without knowing which one it is on.
 */
 
+/*
+    One width for the whole component. The tab strip used to run the full page width while the grid was
+    capped, so the panel appeared to change shape between tabs - most obvious on Party, where a single row
+    leaves nothing below to disguise the mismatch.
+*/
 .grid-shell {
     display: flex;
     flex-direction: column;
     gap: 12px;
     width: 100%;
+    max-width: 620px;
+}
+
+/*
+    The width cap exists to leave room for the detail panel beside the grid. Below the breakpoint the
+    panel becomes a bottom sheet and sits over the page instead of next to it, so the cap would just
+    leave dead space down the right-hand side.
+*/
+@media (max-width: 860px) {
+    .grid-shell {
+        max-width: 100%;
+    }
 }
 
 .box-tabs {
@@ -16,11 +33,16 @@
     gap: 4px;
     overflow-x: auto;
     padding-bottom: 4px;
-    scrollbar-width: thin;
 }
 
 .box-tab {
     flex: 0 0 auto;
+    cursor: pointer;
+    transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+/* skin only - suppressed when the authored theme supplies .tab-cartridge */
+.box-tab:not(.tab-cartridge) {
     padding: 4px 12px;
     font-size: 12px;
     letter-spacing: 0.04em;
@@ -28,15 +50,13 @@
     background: rgba(128, 128, 128, 0.08);
     border: 1px solid rgba(128, 128, 128, 0.25);
     border-radius: 2px;
-    cursor: pointer;
-    transition: background 0.12s ease, border-color 0.12s ease;
 }
 
-.box-tab:hover {
+.box-tab:not(.tab-cartridge):hover {
     background: rgba(128, 128, 128, 0.18);
 }
 
-.box-tab.is-active {
+.box-tab.is-active:not(.tab-cartridge) {
     background: rgba(24, 144, 255, 0.18);
     border-color: rgba(24, 144, 255, 0.65);
 }
@@ -45,7 +65,6 @@
     display: grid;
     gap: 6px;
     width: 100%;
-    max-width: 620px;
 }
 
 .slot {
@@ -54,14 +73,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(128, 128, 128, 0.10);
-    border: 1px solid rgba(128, 128, 128, 0.22);
-    border-radius: 3px;
     cursor: pointer;
     transition: background 0.12s ease, border-color 0.12s ease, transform 0.08s ease;
 }
 
-.slot:hover {
+/* skin only - suppressed when the authored theme supplies .box-slot */
+.slot:not(.box-slot) {
+    background: rgba(128, 128, 128, 0.10);
+    border: 1px solid rgba(128, 128, 128, 0.22);
+    border-radius: 3px;
+}
+
+.slot:not(.box-slot):hover {
     background: rgba(128, 128, 128, 0.20);
     border-color: rgba(128, 128, 128, 0.45);
     transform: translateY(-1px);
@@ -72,6 +95,12 @@
     outline-offset: 1px;
 }
 
+/* the slot the detail panel is currently describing */
+.slot.is-open {
+    border-color: rgba(24, 144, 255, 0.85);
+    box-shadow: inset 0 0 0 2px rgba(24, 144, 255, 0.85);
+}
+
 .slot.is-selected {
     background: rgba(24, 144, 255, 0.20);
     border-color: rgba(24, 144, 255, 0.75);
@@ -79,10 +108,13 @@
 
 /* An empty slot is a position, not a gap - it stays visible so the grid keeps its shape. */
 .slot-empty {
+    cursor: default;
+}
+
+.slot-empty:not(.box-slot) {
     background: rgba(128, 128, 128, 0.04);
     border-style: dashed;
     border-color: rgba(128, 128, 128, 0.18);
-    cursor: default;
 }
 
 /* PokemonIcon sizes itself from the Size parameter; it only needs to stay out of the click path */
@@ -136,7 +168,12 @@
 .box-footer {
     display: flex;
     justify-content: space-between;
-    max-width: 620px;
     font-size: 12px;
     opacity: 0.6;
+}
+
+
+/* wrapper that becomes .pokedex-screen in Pokedex mode; inert otherwise */
+.grid-screen {
+    width: 100%;
 }

@@ -1,0 +1,25 @@
+@using PKHeX.Web.Services.GeneralSettings
+@inject GeneralSettingsService SettingsService
+
+@*
+    What used to be the page footer. It was removed from the shell because on a phone it sat on the same
+    edge as the navigation bar, and on desktop it was a tall block of links below every page.
+*@
+
+<div class="about-panel">
+    <p class="about-line">@ApplicationName &mdash; edit pokemon save files.</p>
+    <p class="about-line">
+        Issues or feedback on <a href="@GitHubRepository" target="_blank">GitHub</a>
+    </p>
+
+    <nav class="about-links">
+        <a href="/privacy-policy">Privacy Policy</a>
+        <a href="/terms-of-use">Terms of Use</a>
+        <a href="/credits">Credits</a>
+        <a href="/release-notes?since=@SettingsService.LastDateNewsSeen?.ToString("yyyy-MM-dd")">Release Notes</a>
+        <a href="/blog">Blog</a>
+    </nav>
+</div>
+
+@code {
+}

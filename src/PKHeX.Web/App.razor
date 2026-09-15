@@ -1,5 +1,6 @@
 ﻿@implements IDisposable
 @inject AntdThemeService ThemeService
+@inject UiModeService UiMode
 
 
 <ConfigProvider
@@ -41,16 +42,29 @@
     {
         _theme = ThemeService.Theme;
         AntdThemeService.ThemeChanged += HandleChangedTheme;
+        UiModeService.ModeChanged += HandleChangedUiMode;
     }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // JS interop is only available once there is a rendered document to talk to.
+        if (firstRender) await UiMode.Apply(ThemeService.IsDarkTheme);
+    }
+
+    private Task HandleChangedUiMode(UiMode mode) => InvokeAsync(StateHasChanged);
 
     private async Task HandleChangedTheme(GlobalTheme theme)
     {
         _theme = theme;
         await _configProvider.ChangeGlobalTheme(_theme);
+
+        // Pokedex mode has its own light and dark palettes, so the theme has to reach CSS too.
+        await UiMode.Apply(ThemeService.IsDarkTheme);
     }
 
     public void Dispose()
     {
         AntdThemeService.ThemeChanged -= HandleChangedTheme;
+        UiModeService.ModeChanged -= HandleChangedUiMode;
     }
 }

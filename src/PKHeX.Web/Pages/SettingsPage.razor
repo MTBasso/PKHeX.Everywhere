@@ -11,6 +11,7 @@
     <TabPane Key="general" Tab="General">
         @inject AntdThemeService ThemeService
         @inject GeneralSettingsService GeneralSettings
+@inject UiModeService UiMode
 
         <ResponsibleDescriptions
             Title="General"
@@ -40,6 +41,15 @@
             Size="DescriptionsSize.Small"
             Style="width: 100%">
 
+            <DescriptionsItem Title="Interface">
+                <Switch
+                    Style="margin-left: auto; margin-right: 15px;"
+                    Value="UiMode.IsPokedex"
+                    OnChange="HandleUiModeChanged"
+                    CheckedChildren="Pokedex"
+                    UnCheckedChildren="Default"/>
+            </DescriptionsItem>
+
             <DescriptionsItem Title="Theme">
                 <Switch
                     Style="margin-left: auto; margin-right: 15px;"
@@ -59,6 +69,10 @@
     <TabPane Key="analytics" Tab="Analytics">
         <AnalyticsResults/>
     </TabPane>
+
+    <TabPane Key="about" Tab="About">
+        <AboutPanel/>
+    </TabPane>
 </Tabs>
 
 @code {
@@ -68,6 +82,9 @@
         CalculatorRepository.Instance
             .GetAll()
             .FirstOrDefault(u => u.Url == GeneralSettings.CalculatorUrl)?.Name;
+
+    private Task HandleUiModeChanged(bool isPokedex) =>
+        UiMode.Set(isPokedex ? PKHeX.Web.Services.UiMode.Pokedex : PKHeX.Web.Services.UiMode.Default);
 
     private async Task HandleThemeChanged(bool isDark)
     {

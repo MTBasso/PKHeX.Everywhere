@@ -5,19 +5,24 @@
 @inject ClipboardService Clipboard
 @inject INotificationService Notification
 @inject LoadPokemonService LoadPokemonService
+@inject UiModeService UiMode
 
 <PageTitle>Storage</PageTitle>
 
 <Flex Direction="FlexDirection.Vertical" Style="width: 100%; gap: 20px;">
-    <PageHeader BackIcon="true" Style="max-width: 100%">
+    <PageHeader BackIcon="false" Style="max-width: 100%">
         <TitleTemplate>Storage</TitleTemplate>
 
         <PageHeaderExtra>
-            <Button Type="@ButtonType.Default"
-                    Icon="@(_showGrid ? IconType.Outline.Table : IconType.Outline.Appstore)"
-                    OnClick="() => _showGrid = !_showGrid">
-                @(_showGrid ? "Table" : "Grid")
-            </Button>
+            @* Pokedex mode is grid only - the table is a default-mode affordance. *@
+            @if (!UiMode.IsPokedex)
+            {
+                <Button Type="@ButtonType.Default"
+                        Icon="@(_showGrid ? IconType.Outline.Table : IconType.Outline.Appstore)"
+                        OnClick="() => _showGrid = !_showGrid">
+                    @(_showGrid ? "Table" : "Grid")
+                </Button>
+            }
 
             <ButtonOrMenu Actions="ExtraActions" />
 
@@ -26,14 +31,27 @@
         </PageHeaderExtra>
     </PageHeader>
 
-    @if (_showGrid)
+    @if (_showGrid || UiMode.IsPokedex)
     {
-        <PokemonGrid
-            PartySlots="@PartySlots"
-            BoxSlots="@BoxSlots"
-            SlotsPerBox="@SlotsPerBox"
-            Selectable
-            @bind-SelectedPokemons="_selectedPokemonList" />
+        <div class="storage-split">
+            <PokemonGrid
+                PartySlots="@PartySlots"
+                BoxSlots="@BoxSlots"
+                SlotsPerBox="@SlotsPerBox"
+                Selectable
+                OnOpen="@(UiMode.IsPokedex ? HandleOpenDetail : default)"
+                OpenedPokemon="@_detailPokemon"
+                @bind-SelectedPokemons="_selectedPokemonList" />
+
+            @if (UiMode.IsPokedex && _detailPokemon is not null)
+            {
+                <PokemonDetailPanel
+                    Pokemon="@_detailPokemon"
+                    Source="@_detailSource"
+                    OnClose="@(() => _detailPokemon = null)"
+                    OnApplied="@(() => _detailPokemon = null)" />
+            }
+        </div>
     }
     else
     {
@@ -67,6 +85,11 @@
     private InputFile _inputGameFile = default!;
 
     private bool _showGrid = true;
+
+    /// Pokedex mode only: the Pokemon shown in the side panel / bottom sheet, and which collection it
+    /// came from - applying an edit writes back to that collection.
+    private Pokemon? _detailPokemon;
+    private PokemonSource _detailSource = PokemonSource.Box;
 
     private IList<ButtonOrMenu.ButtonAction> ExtraActions => new List<ButtonOrMenu.ButtonAction>
     {
@@ -114,6 +137,12 @@
     private int SlotsPerBox => GameService.Game?.SaveFile.BoxSlotCount ?? 30;
 
     private IList<Pokemon> _selectedPokemonList = [];
+
+    private void HandleOpenDetail(PokemonGrid.SlotOpened opened)
+    {
+        _detailPokemon = ReferenceEquals(_detailPokemon, opened.Pokemon) ? null : opened.Pokemon;
+        _detailSource = opened.Source;
+    }
 
     private Task OnAddItemClick()
     {
