@@ -14,6 +14,9 @@ permissions:
 
 jobs:
   build_and_publish:
+    # Upstream only: this deploys into pkhex-web/pkhex-web.github.io with a secret forks do
+    # not have. The fork publishes through fork-pages.yml instead.
+    if: github.repository == 'arleypadua/PKHeX.Everywhere'
     runs-on: ubuntu-latest
 
     steps:

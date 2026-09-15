@@ -1,0 +1,96 @@
+# Deploys this fork to its own GitHub Pages site.
+#
+# Upstream's pkhex-web.yml pushes the built app into a separate repository
+# (pkhex-web/pkhex-web.github.io) using a token this fork does not have, so it cannot
+# be reused here. This builds the same way and publishes to the fork's own Pages.
+name: Fork Pages
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never run two deploys at once; let a newer push supersede a queued one.
+concurrency:
+  group: fork-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      # wwwroot/js is gitignored and produced here; without it the app boots to an
+      # unhandled error, because index.html loads a bundle that is never committed.
+      - name: Build JS bundle
+        run: |
+          cd src/PKHeX.Web/_js
+          npm ci
+          npm run build
+
+      - name: Build blog
+        run: |
+          cd src/PKHeX.Web/_blog
+          npm ci
+          npm run build
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore
+
+      - name: Test
+        run: dotnet test --no-build --verbosity normal
+
+      - name: Publish
+        run: dotnet publish ./src/PKHeX.Web/PKHeX.Web.csproj -c Release -o ./publish
+
+      - name: Rewrite base href for project page
+        run: |
+          # A project page is served from /<repo>/, not /. Blazor resolves every asset and
+          # route against <base href>, so without this the app 404s on its own framework files.
+          cd ./publish/wwwroot
+          sed -i 's|<base href="/" */>|<base href="/${{ github.event.repository.name }}/"/>|' index.html
+          grep -n '<base' index.html
+
+          # Pages serves 404.html for unknown paths; handing it the app makes client-side
+          # routes like /trainer work on a cold load.
+          cp index.html 404.html
+
+          # Stop Pages running the output through Jekyll, which strips _framework.
+          touch .nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./publish/wwwroot
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
