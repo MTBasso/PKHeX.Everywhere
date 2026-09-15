@@ -136,7 +136,7 @@ else
     {
         var testData = await HttpClient.GetByteArrayAsync("https://raw.githubusercontent.com/projectpokemon/ProjectCompleteDexSaves/master/Gen%204%20-%20Pokemon%20SoulSilver%20(ENG).sav");
         GameService.Load(testData, "savedata_1.sav");
-        Navigation.NavigateTo($"/");
+        Navigation.NavigateToHomePage();
     }
     
     private Task GoToHome(MouseEventArgs arg)

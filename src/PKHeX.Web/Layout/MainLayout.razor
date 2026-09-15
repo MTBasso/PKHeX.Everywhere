@@ -141,7 +141,7 @@
             @if (!item.VisibleWithoutGame && !GameService.IsLoaded) continue;
 
             <NavLink class="mobile-nav-item"
-                     href="@($"/{item.Route}")"
+                     href="@(string.IsNullOrEmpty(item.Route) ? "./" : item.Route)"
                      Match="@(string.IsNullOrEmpty(item.Route) ? NavLinkMatch.All : NavLinkMatch.Prefix)">
                 @if (item.Icon is not null)
                 {
@@ -201,7 +201,7 @@
         var currentRoute = Navigation.CurrentRoute();
         if (!GameService.IsLoaded && string.IsNullOrWhiteSpace(currentRoute) || currentRoute == "/")
         {
-            Navigation.NavigateTo("/load");
+            Navigation.NavigateTo("load");
         }
     }
 
@@ -237,7 +237,9 @@
             }
 
             <span class="nav-text">
-                <a href="@item.Route">@item.Label</a>
+                @* "./" rather than "" for the home item: an empty href resolves to the current URL,
+                   not to <base href>, so it would not navigate anywhere. *@
+                <a href="@(string.IsNullOrEmpty(item.Route) ? "./" : item.Route)">@item.Label</a>
             </span>
         </MenuItem>;
 
