@@ -1,24 +1,37 @@
-<Table
-    TItem="Inventory.Item"
-    DataSource="@FilteredDataSource"
-    @bind-PageIndex="_pageIndex"
-    @bind-PageSize="_pageSize"
-    Size="TableSize.Small"
-    RowKey="@(x => x.Id)"
-    Responsive>
-    <PropertyColumn Title="" Property="@(c => c.Definition.Id)">
-        <ItemIcon Item="@context.Definition"/>
-    </PropertyColumn>
-    <PropertyColumn Title="Name" Property="@(c => c.Definition.Name)" Sortable Filterable/>
-    <PropertyColumn Title="Amount" Property="c => c.Count" Sortable Filterable></PropertyColumn>
-    <ActionColumn Title="Action">
-        <Space Size=@("middle")>
-            <SpaceItem>
-                <Button Type="@ButtonType.Link" OnClick="() => ShowModalFor(context)">Edit</Button>
-            </SpaceItem>
-        </Space>
-    </ActionColumn>
-</Table>
+@*
+    Was an AntDesign Table, which on a narrow screen collapsed each item into a stacked
+    Name / Amount / Action block - three lines per item. An item is one line: icon, name, count, edit.
+
+    The table's sort and filter went with it, so a search box replaces them: a full bag runs to a hundred
+    items and scrolling for one is worse than either.
+*@
+
+<div class="item-list-controls">
+    <Input TValue="string"
+           Value="@_search"
+           ValueChanged="HandleSearchChanged"
+           Placeholder="Search items"
+           AllowClear/>
+    <span class="item-list-count">@VisibleItems.Count item(s)</span>
+</div>
+
+<div class="item-list">
+    @foreach (var item in VisibleItems)
+    {
+        var current = item;
+        <div class="item-row">
+            <ItemIcon Item="@current.Definition"/>
+            <span class="item-name" title="@current.Definition.Name">@current.Definition.Name</span>
+            <span class="item-count">@current.Count</span>
+            <Button Type="@ButtonType.Link" Size="@ButtonSize.Small" OnClick="() => ShowModalFor(current)">Edit</Button>
+        </div>
+    }
+
+    @if (VisibleItems.Count == 0)
+    {
+        <p class="item-list-empty">Nothing here.</p>
+    }
+</div>
 
 <Modal Title="@("BasicModal")"
        @bind-Visible="@_modalVisible"
@@ -29,8 +42,6 @@
 
 @code {
     bool _modalVisible = false;
-    int _pageIndex = 1;
-    int _pageSize = 10;
 
     Inventory.Item? _selectedItem;
     int? _selectedItemCount;
@@ -40,6 +51,16 @@
     [Parameter] public bool ShowNone { get; set; } = false;
 
     IList<Inventory.Item> FilteredDataSource => ShowNone ? DataSource : DataSource.Where(i => !i.IsNone).ToList();
+
+    private string _search = string.Empty;
+
+    private void HandleSearchChanged(string value) => _search = value ?? string.Empty;
+
+    private IList<Inventory.Item> VisibleItems => string.IsNullOrWhiteSpace(_search)
+        ? FilteredDataSource
+        : FilteredDataSource
+            .Where(i => i.Definition.Name.Contains(_search.Trim(), StringComparison.OrdinalIgnoreCase))
+            .ToList();
 
     RenderFragment EditItemCountTemplate()
     {

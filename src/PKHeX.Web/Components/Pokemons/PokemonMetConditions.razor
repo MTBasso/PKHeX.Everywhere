@@ -1,39 +1,60 @@
 @using PKHeX.Facade.Repositories
 @inject GameService GameService
 
-<ResponsibleDescriptions Bordered Size="DescriptionsSize.Small" Style="width: 100%">
-    <DescriptionsItem Title="Origin Game">@Pokemon.MetConditions.Version.Name</DescriptionsItem>
-    <DescriptionsItem Title="Location">@Pokemon.MetConditions.Location.Name</DescriptionsItem>
-    <DescriptionsItem Title="Captured With">
-        <ItemSelect
-            Items="@AllBalls"
-            SelectedItemId="Pokemon.Ball.Id"
-            SelectedItemChanged="HandleCapturedWithChanged"/>
-    </DescriptionsItem>
-    <DescriptionsItem Title="Level">
-        <AntDesign.InputNumber
-            TValue="int"
-            Value="Pokemon.MetConditions.Level"
-            OnChange="HandleLevelChanged"
-            Min="1"
-            Max="100"
-            DefaultValue="1"/>
-    </DescriptionsItem>
+<div class="edit-grid">
+    <div class="edit-field">
+        <span class="edit-label">Origin Game</span>
+        <span class="edit-value edit-readonly">@Pokemon.MetConditions.Version.Name</span>
+    </div>
 
-    <DescriptionsItem Title="Date">
-        <DatePicker
-            TValue="DateOnly?"
-            Picker="@DatePickerType.Date"
-            Format="dd/MM/yyyy"
-            AllowClear="false"
-            Value="Pokemon.MetConditions.Date"
-            OnChange="HandleDateChanged"/>
-    </DescriptionsItem>
+    <div class="edit-field">
+        <span class="edit-label">Location</span>
+        <span class="edit-value edit-readonly">@Pokemon.MetConditions.Location.Name</span>
+    </div>
 
-    <DescriptionsItem Title="Fateful Encounter">
-        <Switch Value="Pokemon.MetConditions.FatefulEncounter" OnChange="HandleFatefulEncounterChange" />
-    </DescriptionsItem>
-</ResponsibleDescriptions>
+    <div class="edit-field">
+        <span class="edit-label">Captured With</span>
+        <span class="edit-value">
+            <ItemSelect
+                Items="@AllBalls"
+                SelectedItemId="Pokemon.Ball.Id"
+                SelectedItemChanged="HandleCapturedWithChanged"/>
+        </span>
+    </div>
+
+    <div class="edit-field">
+        <span class="edit-label">Level</span>
+        <span class="edit-value">
+            <AntDesign.InputNumber
+                TValue="int"
+                Value="Pokemon.MetConditions.Level"
+                OnChange="HandleLevelChanged"
+                Min="1"
+                Max="100"
+                DefaultValue="1"/>
+        </span>
+    </div>
+
+    <div class="edit-field">
+        <span class="edit-label">Date</span>
+        <span class="edit-value">
+            <DatePicker
+                TValue="DateOnly?"
+                Picker="@DatePickerType.Date"
+                Format="dd/MM/yyyy"
+                AllowClear="false"
+                Value="Pokemon.MetConditions.Date"
+                OnChange="HandleDateChanged"/>
+        </span>
+    </div>
+
+    <div class="edit-field">
+        <span class="edit-label">Fateful Encounter</span>
+        <span class="edit-value">
+            <Switch Value="Pokemon.MetConditions.FatefulEncounter" OnChange="HandleFatefulEncounterChange"/>
+        </span>
+    </div>
+</div>
 
 @code {
     [Parameter] public required Pokemon Pokemon { get; set; }

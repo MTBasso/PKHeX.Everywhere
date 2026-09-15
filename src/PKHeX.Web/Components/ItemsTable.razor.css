@@ -1,0 +1,55 @@
+.item-list-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.item-list-controls ::deep .ant-input-affix-wrapper,
+.item-list-controls ::deep .ant-input {
+    max-width: 260px;
+}
+
+.item-list-count {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.5;
+    white-space: nowrap;
+}
+
+.item-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 6px;
+}
+
+.item-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 10px;
+    border: 1px solid rgba(128, 128, 128, 0.22);
+    border-radius: 2px;
+}
+
+.item-name {
+    min-width: 0;
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.item-count {
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.7;
+}
+
+.item-list-empty {
+    margin: 0;
+    opacity: 0.5;
+    font-size: 13px;
+}

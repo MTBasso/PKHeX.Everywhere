@@ -3,6 +3,22 @@
 @using Gender = PKHeX.Facade.Gender
 @inject INotificationService Notification
 
+@*
+    Types and PID cannot be edited here, so they were two full table rows spent on read-only facts. They
+    read better as tags above the fields.
+*@
+<div class="description-tags">
+    <PokemonTypeImage Types="Pokemon.Types.Tuple" Index="PokemonTypeImage.TypeIndex.Primary"/>
+    @if (Pokemon.Types.HasSecondary)
+    {
+        <PokemonTypeImage Types="Pokemon.Types.Tuple" Index="PokemonTypeImage.TypeIndex.Secondary"/>
+    }
+
+    <span class="description-tag">
+        PID <Text Copyable>@Pokemon.PID.ToString("X8")</Text>
+    </span>
+</div>
+
 <ResponsibleDescriptions
     Bordered
     Size="DescriptionsSize.Small"
@@ -17,18 +33,6 @@
             ShowIcon="false"/>
     </DescriptionsItem>
 
-    <DescriptionsItem Title="Types">
-        <Space Style="gap: 5px" Direction="SpaceDirection.Vertical" Wrap>
-            <PokemonTypeImage Types="Pokemon.Types.Tuple" Index="PokemonTypeImage.TypeIndex.Primary"/>
-            @if (Pokemon.Types.HasSecondary)
-            {
-                <PokemonTypeImage Types="Pokemon.Types.Tuple" Index="PokemonTypeImage.TypeIndex.Secondary"/>
-            }
-        </Space>
-    </DescriptionsItem>
-    <DescriptionsItem Title="PID">
-        <Text Copyable>@Pokemon.PID.ToString("X8")</Text>
-    </DescriptionsItem>
     <DescriptionsItem Title="Nickname">
         <Text Editable EditConfig="_editableNickname">
             @(Pokemon.NicknameSet ? Pokemon.Nickname : "---")

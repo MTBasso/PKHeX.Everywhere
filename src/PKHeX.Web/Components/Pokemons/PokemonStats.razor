@@ -5,45 +5,60 @@
 @inject PlugInRegistry PlugInRegistry
 @inject PlugInRuntime PlugInRuntime
 
-<Flex Style="gap: 20px;" Wrap="FlexWrap.Wrap">
-    @foreach (var description in Descriptions)
-    {
-        <ResponsibleDescriptions Bordered Title="@description.Key" Size="DescriptionsSize.Small" Style="width: 100%">
-            <DescriptionsItem Title="Base">
-                @InputFor(@description.Value.GetBase, @description.Value.SetBase, @description.Value.ReadOnly || @description.Value.GetIsBaseVirtual())
-            </DescriptionsItem>
-            <DescriptionsItem Title="IV">
-                @InputFor(@description.Value.GetIv, @description.Value.SetIv, @description.Value.ReadOnly)
-            </DescriptionsItem>
-            <DescriptionsItem Title="EV">
-                @InputFor(@description.Value.GetEv, @description.Value.SetEv, @description.Value.ReadOnly)
-            </DescriptionsItem>
+@*
+    Each stat used to be its own bordered Descriptions block - seven stacked panels for what is really a
+    small table. One row per stat leaves room to show the spread as a chart beside it.
+*@
+
+<div class="stats-layout">
+    <div class="stats-table">
+        <div class="stats-row stats-head">
+            <span>Stat</span>
+            <span>Base</span>
+            <span>IV</span>
+            <span>EV</span>
             @if (Pokemon.AVs != null)
             {
-                <DescriptionsItem Title="AV">
-                    @InputFor(@description.Value.GetAv, @description.Value.SetAv, @description.Value.ReadOnly)
-                </DescriptionsItem>
+                <span>AV</span>
             }
-        </ResponsibleDescriptions>
-    }
+        </div>
 
-    @if (Pokemon.BaseStats.CombatPower is not null)
-    {
-        <ResponsibleDescriptions Bordered Title="Extra" Size="DescriptionsSize.Small" Style="width: 100%">
-            <DescriptionsItem Title="CP">
-                <AntDesign.InputNumber
-                    TValue="int"
-                    Value="Pokemon.BaseStats.CombatPower.Value"
-                    OnChange="v => HandleStatChange(_ => Pokemon.BaseStats.CombatPower = v, v)"/>
-                <Button
-                    OnClick="HandleResetCpClick">
-                    Re-calculate
-                </Button>
+        @foreach (var description in Descriptions)
+        {
+            <div class="stats-row @(Pokemon.AVs != null ? "has-av" : "")">
+                <span class="stats-name">@description.Key</span>
+                <span>@InputFor(description.Value.GetBase, description.Value.SetBase, description.Value.ReadOnly || description.Value.GetIsBaseVirtual())</span>
+                <span>@InputFor(description.Value.GetIv, description.Value.SetIv, description.Value.ReadOnly)</span>
+                <span>@InputFor(description.Value.GetEv, description.Value.SetEv, description.Value.ReadOnly)</span>
+                @if (Pokemon.AVs != null)
+                {
+                    <span>@InputFor(description.Value.GetAv, description.Value.SetAv, description.Value.ReadOnly)</span>
+                }
+            </div>
+        }
 
-            </DescriptionsItem>
-        </ResponsibleDescriptions>
-    }
-</Flex>
+        @if (Pokemon.BaseStats.CombatPower is not null)
+        {
+            <div class="stats-row stats-cp">
+                <span class="stats-name">CP</span>
+                <span>
+                    <AntDesign.InputNumber
+                        TValue="int"
+                        Value="Pokemon.BaseStats.CombatPower.Value"
+                        OnChange="v => HandleStatChange(_ => Pokemon.BaseStats.CombatPower = v, v)"/>
+                </span>
+                <span class="stats-cp-action">
+                    <Button Size="@ButtonSize.Small" OnClick="HandleResetCpClick">Re-calculate</Button>
+                </span>
+            </div>
+        }
+    </div>
+
+    <div class="stats-chart">
+        <StatRadar Values="@RadarValues" Label="Stat spread"/>
+        <p class="stats-chart-legend">Base + IV + EV/4</p>
+    </div>
+</div>
 
 @{ var actions = PlugInRegistry.GetAllEnabledHooks<IPokemonStatsEditAction>().ToList(); }
 @if (actions.Any())
@@ -100,6 +115,30 @@
         }
 
         return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// The shape reflects the whole stat rather than the base alone, so editing IVs and EVs moves it.
+    /// EVs are divided by four because that is how they convert in the games - four EVs are worth one
+    /// point - and using them raw would swamp the other two.
+    /// </summary>
+    private static int TotalOf(DescriptionRecord stat) => stat.GetBase() + stat.GetIv() + stat.GetEv() / 4;
+
+    private IReadOnlyList<StatRadar.Axis> RadarValues
+    {
+        get
+        {
+            var stats = Descriptions;
+            return
+            [
+                new("HP", TotalOf(stats["HP"])),
+                new("Atk", TotalOf(stats["Attack"])),
+                new("Def", TotalOf(stats["Defense"])),
+                new("SpA", TotalOf(stats["Special Attack"])),
+                new("SpD", TotalOf(stats["Special Defense"])),
+                new("Spe", TotalOf(stats["Speed"])),
+            ];
+        }
     }
 
     private Dictionary<string, DescriptionRecord> Descriptions => new()

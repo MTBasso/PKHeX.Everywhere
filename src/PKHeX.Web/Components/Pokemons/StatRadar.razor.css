@@ -1,0 +1,30 @@
+.stat-radar {
+    display: block;
+    width: 100%;
+    max-width: 260px;
+    height: auto;
+    overflow: visible;
+}
+
+.radar-ring,
+.radar-axis {
+    fill: none;
+    stroke: currentColor;
+    opacity: 0.18;
+    stroke-width: 1;
+}
+
+.radar-shape {
+    fill: rgba(24, 144, 255, 0.28);
+    stroke: rgba(24, 144, 255, 0.9);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+}
+
+.radar-label {
+    fill: currentColor;
+    opacity: 0.9;
+    font-size: 9px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}

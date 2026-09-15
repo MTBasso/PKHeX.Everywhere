@@ -8,6 +8,19 @@ html, body {
     -webkit-font-smoothing: antialiased;
 }
 
+/*
+    Scrollbars are hidden in both UI modes - the chrome only, never the scrolling itself. Wheel, trackpad,
+    touch, keyboard and programmatic scrolling all behave exactly as before.
+*/
+* {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+    display: none;
+}
+
 #app {
     height: 100%;
 }
@@ -101,3 +114,86 @@ code {
     pointer-events: none;
 }
 
+
+/*
+    Editor field grid.
+
+    Replaces AntDesign's Descriptions tables inside the Pokemon editor. A bordered table spends a whole
+    column on labels and forces one field per row, which wasted most of the width - these fields are
+    short and pack several to a row instead.
+*/
+.edit-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 12px 20px;
+    width: 100%;
+}
+
+.edit-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.edit-label {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.55;
+}
+
+.edit-hint {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+}
+
+.edit-value {
+    font-size: 13px;
+    min-width: 0;
+}
+
+.edit-value .ant-input-number,
+.edit-value .ant-select,
+.edit-value .ant-picker,
+.edit-value .ant-input {
+    width: 100%;
+}
+
+.edit-readonly {
+    display: block;
+    padding: 4px 0;
+}
+
+.edit-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: 100%;
+}
+
+.edit-section-title {
+    margin: 0 0 8px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.6;
+}
+
+/*
+    Four moves in an auto-fitting grid landed as three on one row and one orphaned below. A fixed pair of
+    columns keeps them as 2x2, collapsing to a single column when there is no room for two.
+*/
+.edit-grid-pairs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 560px) {
+    .edit-grid-pairs {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

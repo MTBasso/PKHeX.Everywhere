@@ -1,82 +1,98 @@
-<Flex Style="gap: 20px; width: 100%" Direction="FlexDirection.Vertical" Wrap="FlexWrap.Wrap">
-    <ResponsibleDescriptions
-        Bordered
-        Size="DescriptionsSize.Small"
-        Style="width: 100%">
-        <DescriptionsItem
-            Title="Handler">
+@*
+    Three stacked bordered tables became three labelled groups of fields. The section headings stay,
+    because which trainer a field belongs to is the point of this tab.
+*@
+<div class="edit-sections">
+    <div class="edit-field">
+        <span class="edit-label">Handler</span>
+        <span class="edit-value">
             <RadioGroup
                 TValue="Owner.Handler"
-                Value="Pokemon.Owner.CurrentHandler" 
-                ValueChanged="@(v => OnCurrentHandlerChanged(v))" 
+                Value="Pokemon.Owner.CurrentHandler"
+                ValueChanged="@(v => OnCurrentHandlerChanged(v))"
                 ButtonStyle="@RadioButtonStyle.Solid">
                 <Radio RadioButton Value="@(Owner.Handler.OriginalTrainer)">OT</Radio>
                 <Radio RadioButton Value="@(Owner.Handler.SomeoneElse)">Other</Radio>
             </RadioGroup>
-        </DescriptionsItem>
-    </ResponsibleDescriptions>
+        </span>
+    </div>
 
-    <ResponsibleDescriptions
-        Bordered
-        Title="@OTTitle"
-        Size="DescriptionsSize.Small"
-        Style="width: 100%">
-        <DescriptionsItem Title="TID">
-            <AntDesign.InputNumber
-                TValue="uint"
-                Value="Pokemon.Owner.TID"
-                OnChange="HandleTIDChanged"
-                PlaceHolder="TID"
-                Min="0"
-                Max="uint.MaxValue"/>
-        </DescriptionsItem>
+    <section class="edit-section">
+        <h4 class="edit-section-title">@OTTitle</h4>
+        <div class="edit-grid">
+            <div class="edit-field">
+                <span class="edit-label">TID</span>
+                <span class="edit-value">
+                    <AntDesign.InputNumber
+                        TValue="uint"
+                        Value="Pokemon.Owner.TID"
+                        OnChange="HandleTIDChanged"
+                        PlaceHolder="TID"
+                        Min="0"
+                        Max="uint.MaxValue"/>
+                </span>
+            </div>
 
-        <DescriptionsItem Title="SID">
-            <AntDesign.InputNumber
-                TValue="uint"
-                Value="Pokemon.Owner.SID"
-                OnChange="HandleSIDChanged"
-                PlaceHolder="SID"
-                Min="0"
-                Max="uint.MaxValue"/>
-        </DescriptionsItem>
+            <div class="edit-field">
+                <span class="edit-label">SID</span>
+                <span class="edit-value">
+                    <AntDesign.InputNumber
+                        TValue="uint"
+                        Value="Pokemon.Owner.SID"
+                        OnChange="HandleSIDChanged"
+                        PlaceHolder="SID"
+                        Min="0"
+                        Max="uint.MaxValue"/>
+                </span>
+            </div>
 
-        <DescriptionsItem Title="Name">
-            <Input
-                TValue="string"
-                Value="Pokemon.Owner.Name"
-                OnChange="HandleNameChanged"
-                PlaceHolder="Name"
-                Style="max-width: 200px;"/>
-        </DescriptionsItem>
+            <div class="edit-field">
+                <span class="edit-label">Name</span>
+                <span class="edit-value">
+                    <Input
+                        TValue="string"
+                        Value="Pokemon.Owner.Name"
+                        OnChange="HandleNameChanged"
+                        PlaceHolder="Name"/>
+                </span>
+            </div>
 
-        <DescriptionsItem Title="Gender">
-            <GenderSelector
-                Gender="Pokemon.Owner.Gender"
-                OnGenderChanged="HandleGenderChanged"/>
-        </DescriptionsItem>
-    </ResponsibleDescriptions>
+            <div class="edit-field">
+                <span class="edit-label">Gender</span>
+                <span class="edit-value">
+                    <GenderSelector
+                        Gender="Pokemon.Owner.Gender"
+                        OnGenderChanged="HandleGenderChanged"/>
+                </span>
+            </div>
+        </div>
+    </section>
 
-    <ResponsibleDescriptions
-        Bordered
-        Title="@HandlerTitle"
-        Size="DescriptionsSize.Small"
-        Style="width: 100%">
-        <DescriptionsItem Title="Name">
-            <Input
-                TValue="string"
-                Value="Pokemon.Owner.HandlingTrainerName"
-                OnChange="HandleHandlingTrainerNameChanged"
-                PlaceHolder="Name"/>
-        </DescriptionsItem>
+    <section class="edit-section">
+        <h4 class="edit-section-title">@HandlerTitle</h4>
+        <div class="edit-grid">
+            <div class="edit-field">
+                <span class="edit-label">Name</span>
+                <span class="edit-value">
+                    <Input
+                        TValue="string"
+                        Value="Pokemon.Owner.HandlingTrainerName"
+                        OnChange="HandleHandlingTrainerNameChanged"
+                        PlaceHolder="Name"/>
+                </span>
+            </div>
 
-        <DescriptionsItem Title="Gender">
-            <GenderSelector
-                Gender="Pokemon.Owner.HandlingTrainerGender"
-                OnGenderChanged="HandleHandlingTrainerGenderChanged"/>
-        </DescriptionsItem>
-    </ResponsibleDescriptions>
-</Flex>
+            <div class="edit-field">
+                <span class="edit-label">Gender</span>
+                <span class="edit-value">
+                    <GenderSelector
+                        Gender="Pokemon.Owner.HandlingTrainerGender"
+                        OnGenderChanged="HandleHandlingTrainerGenderChanged"/>
+                </span>
+            </div>
+        </div>
+    </section>
+</div>
 
 @code {
     [Parameter] public required Pokemon Pokemon { get; set; }

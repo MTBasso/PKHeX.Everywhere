@@ -1,0 +1,74 @@
+@using System.Globalization
+@using System.Net
+
+@*
+    A six-axis radar drawn by hand rather than pulled from a chart library: it is a handful of points on
+    a circle, it inherits the page's colours through currentColor, and it carries no dependency.
+*@
+
+<svg class="stat-radar" viewBox="0 0 220 196" role="img" aria-label="@Label">
+    @foreach (var ring in Rings)
+    {
+        <polygon class="radar-ring" points="@ring"/>
+    }
+
+    @foreach (var point in AxisEnds)
+    {
+        <line class="radar-axis" x1="@F(Cx)" y1="@F(Cy)" x2="@F(point.X)" y2="@F(point.Y)"/>
+    }
+
+    <polygon class="radar-shape" points="@ShapePoints"/>
+
+    @* Razor reserves <text> as a control tag, so the SVG labels are emitted as markup. *@
+    @((MarkupString)AxisLabelMarkup)
+</svg>
+
+@code {
+    [Parameter, EditorRequired] public required IReadOnlyList<Axis> Values { get; set; }
+    [Parameter] public string Label { get; set; } = "Stat spread";
+
+    public record Axis(string Name, int Value);
+
+    private const double Cx = 110;
+    private const double Cy = 96;
+    private const double Radius = 62;
+
+    /// Scaled against the highest value present, with a floor so a weak Pokemon does not fill the chart.
+    private double Max => Math.Max(100, Values.Count == 0 ? 100 : Values.Max(v => v.Value));
+
+    private static string F(double value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+
+    private static (double X, double Y) PointAt(double angleIndex, double count, double radius)
+    {
+        var angle = -Math.PI / 2 + 2 * Math.PI * angleIndex / count;
+        return (Cx + radius * Math.Cos(angle), Cy + radius * Math.Sin(angle));
+    }
+
+    private IEnumerable<string> Rings => new[] { 0.25, 0.5, 0.75, 1.0 }
+        .Select(scale => string.Join(" ", Values.Select((_, i) =>
+        {
+            var (x, y) = PointAt(i, Values.Count, Radius * scale);
+            return $"{F(x)},{F(y)}";
+        })));
+
+    private IEnumerable<(double X, double Y)> AxisEnds =>
+        Values.Select((_, i) => PointAt(i, Values.Count, Radius));
+
+    private string ShapePoints => string.Join(" ", Values.Select((axis, i) =>
+    {
+        var ratio = Math.Clamp(axis.Value / Max, 0, 1);
+        var (x, y) = PointAt(i, Values.Count, Radius * ratio);
+        return $"{F(x)},{F(y)}";
+    }));
+
+    private string AxisLabelMarkup => string.Concat(Values.Select((axis, i) =>
+    {
+        var (x, y) = PointAt(i, Values.Count, Radius + 18);
+        var dx = x - Cx;
+        var anchor = dx > 4 ? "start" : dx < -4 ? "end" : "middle";
+        var caption = WebUtility.HtmlEncode($"{axis.Name} {axis.Value}");
+
+        return "<text class=\"radar-label\" x=\"" + F(x) + "\" y=\"" + F(y + 4) +
+               "\" text-anchor=\"" + anchor + "\">" + caption + "</text>";
+    }));
+}
